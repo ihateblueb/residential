@@ -1,3 +1,5 @@
 package me.blueb.residential.events
 
-class ResidentialTownCreationEvent : ResidentialTownEvent()
+import java.util.UUID
+
+class ResidentialTownCreationEvent(town: UUID) : ResidentialTownEvent(town)

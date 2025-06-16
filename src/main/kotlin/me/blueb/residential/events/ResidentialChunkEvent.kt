@@ -1,13 +1,13 @@
 package me.blueb.residential.events
 
+import me.blueb.residential.models.Chunk
 import org.bukkit.event.Cancellable
 import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 import org.jetbrains.annotations.ApiStatus
-import java.util.*
 
 @ApiStatus.OverrideOnly
-open class ResidentialTownEvent(val town: UUID) : Event(), Cancellable {
+open class ResidentialChunkEvent(val chunk: Chunk) : Event(), Cancellable {
     private var cancelled: Boolean = false
     override fun isCancelled(): Boolean = cancelled
     override fun setCancelled(cancel: Boolean) {

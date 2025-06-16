@@ -8,13 +8,13 @@ import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.Commands
 import me.blueb.residential.Residential
 import me.blueb.residential.ResidentialConfig
-import me.blueb.residential.services.ChunkService
+import me.blueb.residential.models.GracefulCommandException
 import me.blueb.residential.services.ResidentService
+import me.blueb.residential.services.TownService
 import me.blueb.residential.util.ChunkUtil
 import me.blueb.residential.util.CommandUtil
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
-import net.milkbowl.vault.economy.Economy
 import org.bukkit.entity.Player
 
 @Suppress("UnstableApiUsage", "SameReturnValue")
@@ -53,15 +53,6 @@ class TownCommand {
 
             val name = ctx.getArgument("name", String::class.java)
 
-            println(ChunkUtil.chunkToString(player.chunk))
-
-            val chunk = ChunkService.get(ChunkUtil.chunkToString(player.chunk))
-
-            if (chunk != null) {
-                player.sendMessage(MiniMessage.miniMessage().deserialize("<red>This chunk is already claimed."))
-                return Command.SINGLE_SUCCESS
-            }
-
             // TODO: min distance between claimed areas
 
             if (name.isNullOrBlank()) {
@@ -81,7 +72,14 @@ class TownCommand {
                 return Command.SINGLE_SUCCESS
             }
 
-            player.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Supposed to create town: $name."))
+            val homeChunk = player.chunk
+
+            try {
+                TownService.register(name, player.uniqueId, ChunkUtil.chunkToString(homeChunk), player.world.name, player.location.toString())
+            } catch (e: GracefulCommandException) {
+                player.sendMessage(MiniMessage.miniMessage().deserialize("<red>${e.message}"))
+                return Command.SINGLE_SUCCESS
+            }
 
             return Command.SINGLE_SUCCESS
         }

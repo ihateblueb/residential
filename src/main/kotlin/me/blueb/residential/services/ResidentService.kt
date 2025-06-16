@@ -21,10 +21,15 @@ class ResidentService {
                             DatabaseUtil.extractList(rsTrusted) { DatabaseUtil.extractUuid(it) }
                         else listOf()
 
+                        val rsTown = rs.getString("town")
+                        val town = if (!rs.wasNull())
+                            DatabaseUtil.extractUuid(rsTown)
+                        else null
+
                         val resident = Resident(
                             uuid = UUID.fromString(rs.getString("uuid")),
                             trusted = trusted,
-                            town = null,
+                            town = town,
                         )
                         println("Fetched resident ${resident.uuid}")
                         return@get resident
@@ -49,9 +54,13 @@ class ResidentService {
             return get(uuid)!!
         }
 
-        fun update(uuid: UUID) {
-            Residential.instance.server.getPlayer(uuid)?.let { player ->
+        fun joinTown(resident: UUID, town: UUID) {
+            val connection = ResidentialDatabase.connection
 
+            connection.prepareStatement("UPDATE resident SET town = ? WHERE uuid = ?").use { stmt ->
+                stmt.setString(1, town.toString())
+                stmt.setString(2, resident.toString())
+                stmt.execute()
             }
         }
     }
