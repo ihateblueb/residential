@@ -6,12 +6,12 @@ import org.jetbrains.annotations.ApiStatus
 import java.util.UUID
 
 @ApiStatus.OverrideOnly
-open class TownEvent : Event() {
+open class ResidentialTownEvent : Event() {
     override fun getHandlers(): HandlerList {
         return handlerList
     }
 
-    private var town: UUID
+    var town: UUID
         get() = this.town
         set(town) { this.town = town }
 

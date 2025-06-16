@@ -1,3 +1,9 @@
+# Residential will only allow function in these worlds.
+worlds:
+  - "world"
+  - "world_nether"
+  - "world_the_end"
+
 town:
   name:
     maxLength: 20

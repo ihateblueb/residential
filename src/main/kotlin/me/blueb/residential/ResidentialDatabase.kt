@@ -66,6 +66,37 @@ class ResidentialDatabase {
                     stmt.execute("UPDATE database_meta SET version = 2 WHERE id = 'r'")
                     Residential.instance.logger.info("Updated database schema to version 2")
                 }
+
+                if (version == 2) {
+                    stmt.execute("ALTER TABLE town ADD COLUMN foundedAt varchar(125)")
+
+                    stmt.execute("ALTER TABLE nation ADD COLUMN foundedAt varchar(125)")
+
+                    stmt.execute("UPDATE database_meta SET version = 3 WHERE id = 'r'")
+                    Residential.instance.logger.info("Updated database schema to version 3")
+                }
+
+                if (version == 3) {
+                    stmt.execute("CREATE TABLE chunk(location varchar(64) primary key);")
+
+                    stmt.execute("ALTER TABLE chunk ADD COLUMN town uuid NULL")
+                    stmt.execute("ALTER TABLE chunk ADD COLUMN plot uuid NULL")
+
+                    stmt.execute("ALTER TABLE town DROP COLUMN chunks")
+                    stmt.execute("ALTER TABLE town DROP COLUMN residents")
+                    stmt.execute("ALTER TABLE plot DROP COLUMN chunks")
+                    stmt.execute("ALTER TABLE resident DROP COLUMN claims")
+                    stmt.execute("ALTER TABLE nation DROP COLUMN towns")
+
+                    stmt.execute("ALTER TABLE resident ADD COLUMN town uuid NULL")
+                    stmt.execute("ALTER TABLE town ADD COLUMN nation uuid NULL")
+                    stmt.execute("ALTER TABLE town ADD COLUMN homeChunk varchar(64) NULL")
+                    stmt.execute("ALTER TABLE town ADD COLUMN spawn varchar(264) NULL")
+                    stmt.execute("ALTER TABLE plot ADD COLUMN spawn varchar(264) NULL")
+
+                    stmt.execute("UPDATE database_meta SET version = 4 WHERE id = 'r'")
+                    Residential.instance.logger.info("Updated database schema to version 4")
+                }
             }
         }
 

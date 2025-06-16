@@ -14,11 +14,13 @@ class Residential : JavaPlugin() {
                 instance.server.pluginManager.disablePlugin(this)
                 return
             }
-            if (instance.server.servicesManager.getRegistration(Economy::class.java) == null) {
+            val rsp = instance.server.servicesManager.getRegistration(Economy::class.java)
+            if (rsp == null) {
                 instance.logger.severe("An economy provider is required to use Residential.")
                 instance.server.pluginManager.disablePlugin(this)
                 return
             }
+            economy = rsp.provider
         }
         instance.logger.info("Vault setup in ${vaultTimeTaken.inWholeMilliseconds} ms")
 
@@ -47,5 +49,6 @@ class Residential : JavaPlugin() {
 
     companion object {
         lateinit var instance: Residential
+        lateinit var economy: Economy
     }
 }

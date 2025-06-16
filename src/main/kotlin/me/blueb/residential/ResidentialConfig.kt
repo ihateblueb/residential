@@ -5,9 +5,9 @@ import org.spongepowered.configurate.CommentedConfigurationNode
 import org.spongepowered.configurate.kotlin.objectMapperFactory
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader
 import kotlin.io.path.Path
-import kotlin.time.measureTimedValue
 
 class ResidentialConfig {
+    init { throw AssertionError("This class is not intended to be initialized.") }
     companion object {
         val loader: YamlConfigurationLoader = YamlConfigurationLoader.builder()
             .path(Path("${Residential.instance.dataPath}/config.yml"))

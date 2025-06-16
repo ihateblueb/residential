@@ -16,19 +16,13 @@ class ResidentService {
                 stmt.setString(1, uuid.toString())
                 stmt.executeQuery().use { rs ->
                     while (rs.next()) {
-                        val rsClaims = rs.getString("claims")
-                        val claims = if (!rs.wasNull())
-                            DatabaseUtil.extractList(rsClaims) { DatabaseUtil.extractUuid(it) }
-                        else listOf()
-
-                        val rsTrusted = rs.getString("claims")
+                        val rsTrusted = rs.getString("trusted")
                         val trusted = if (!rs.wasNull())
                             DatabaseUtil.extractList(rsTrusted) { DatabaseUtil.extractUuid(it) }
                         else listOf()
 
                         val resident = Resident(
                             uuid = UUID.fromString(rs.getString("uuid")),
-                            claims = claims,
                             trusted = trusted,
                             town = null,
                         )
@@ -52,12 +46,7 @@ class ResidentService {
 
             println("Resident $uuid registered")
 
-            return Resident(
-                uuid = uuid,
-                claims = listOf(),
-                trusted = listOf(),
-                town = null
-            )
+            return get(uuid)!!
         }
 
         fun update(uuid: UUID) {

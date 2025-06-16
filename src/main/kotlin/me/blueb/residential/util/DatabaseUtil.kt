@@ -1,11 +1,16 @@
 package me.blueb.residential.util
 
+import java.time.LocalDateTime
 import java.util.UUID
 
 class DatabaseUtil {
     companion object {
         fun extractUuid(string: String?): UUID? {
             return if (string != null) UUID.fromString(string) else null
+        }
+
+        fun extractLocalDateTime(string: String?): LocalDateTime? {
+            return if (string != null) LocalDateTime.parse(string) else null
         }
 
         fun <T> extractList(string: String, converter: (String) -> T): List<T> {

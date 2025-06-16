@@ -2,8 +2,8 @@ package me.blueb.residential.models
 
 import java.util.UUID
 
-data class Resident(
-    val uuid: UUID,
-    val trusted: List<UUID?>,
+data class Chunk(
+    val location: String,
     val town: UUID?,
+    val plot: UUID?,
 )
