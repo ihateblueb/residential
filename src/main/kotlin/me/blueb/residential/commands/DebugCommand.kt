@@ -13,24 +13,9 @@ class DebugCommand {
     companion object {
         fun create(): LiteralArgumentBuilder<CommandSourceStack> = Commands.literal("debug")
             .executes { ctx -> run(ctx) }
-            .then(
-                Commands.literal("sql")
-                    .then(
-                        Commands.argument("sql", StringArgumentType.string())
-                            .executes { ctx -> runSql(ctx) }
-                    )
-            )
 
         private fun run(ctx: CommandContext<CommandSourceStack>): Int {
             ctx.source.sender.sendMessage(Component.text("Argument required!"))
-            return Command.SINGLE_SUCCESS
-        }
-
-        private fun runSql(ctx: CommandContext<CommandSourceStack>): Int {
-            val sql = ctx.getArgument("section", String::class.java)
-
-            // TODO
-
             return Command.SINGLE_SUCCESS
         }
     }

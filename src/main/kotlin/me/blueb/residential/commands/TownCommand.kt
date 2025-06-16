@@ -5,9 +5,8 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.Commands
-import me.blueb.residential.service.ResidentService
+import me.blueb.residential.services.ResidentService
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.entity.Player
 
 @Suppress("UnstableApiUsage")
@@ -26,9 +25,10 @@ class TownCommand {
 
             val player = ctx.source.executor as Player
 
-            val residentTown = ResidentService.getTown(player.uniqueId)
+            val resident = ResidentService.get(player.uniqueId)
+            val townUuid = resident?.town
 
-            player.sendMessage(Component.text(if (residentTown != null) "Town: $residentTown" else "You aren't apart of a town."))
+            player.sendMessage(Component.text(if (townUuid != null) "Town: $townUuid" else "You aren't apart of a town."))
 
             return Command.SINGLE_SUCCESS
         }

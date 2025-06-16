@@ -11,6 +11,7 @@ class Residential : JavaPlugin() {
         ResidentialDatabase.setup()
 
         ResidentialCommands.register(instance)
+        ResidentialListeners.register(instance)
     }
 
     override fun onDisable() {

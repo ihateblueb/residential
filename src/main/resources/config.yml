@@ -1,0 +1,46 @@
+resident:
+  maxTowns: 1
+
+town:
+  tag:
+    enabled: true
+    maxLength: 4
+
+  # Allows towns to be abandoned without deleting them.
+  # The town borders will remain, but no protections will.
+  abandonment: true
+
+  # Allows collecting money automatically from residents
+  # Percent, interval, and cost are all configurable by towns
+  # These are just default values
+  tax:
+    enabled: true
+    percent: false
+    # In Residential days
+    interval: 1
+    cost: 5
+
+  # Set to 0 for no limit
+  balanceLimit: 0
+
+# Nations allow pooling resources between towns
+nation:
+  enabled: true
+  tag:
+    enabled: true
+    maxLength: 4
+
+  # Allows collecting money automatically from towns or residents
+  # Percent, interval, and cost are all configurable by nations
+  # These are just default values
+  tax:
+    enabled: true
+    percent: false
+    # town or resident
+    target: town
+    # In Residential days
+    interval: 1
+    cost: 15
+
+  # Set to 0 for no limit
+  balanceLimit: 0
