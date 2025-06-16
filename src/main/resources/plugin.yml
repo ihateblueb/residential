@@ -1,0 +1,6 @@
+name: "Residential"
+version: '2025.5.1.0-SNAPSHOT'
+main: me.blueb.residential.Residential
+api-version: '1.21'
+load: STARTUP
+authors: [ blueb ]
