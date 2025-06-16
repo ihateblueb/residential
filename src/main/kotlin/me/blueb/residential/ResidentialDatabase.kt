@@ -4,6 +4,7 @@ import java.sql.Connection
 import java.sql.DriverManager
 
 class ResidentialDatabase {
+    init { throw AssertionError("This class is not intended to be initialized.") }
     companion object {
         fun connect() {
             Class.forName("org.sqlite.JDBC")
@@ -51,9 +52,24 @@ class ResidentialDatabase {
                     stmt.execute("UPDATE database_meta SET version = 1 WHERE id = 'r'")
                     Residential.instance.logger.info("Updated database schema to version 1")
                 }
+
+                if (version == 1) {
+                    stmt.execute("ALTER TABLE resident ADD COLUMN name varchar(16)")
+
+                    stmt.execute("ALTER TABLE town ADD COLUMN name varchar(125)")
+                    stmt.execute("ALTER TABLE town ADD COLUMN founder uuid NULL")
+                    stmt.execute("ALTER TABLE town ADD COLUMN abandoned boolean default false")
+
+                    stmt.execute("ALTER TABLE nation ADD COLUMN name varchar(125)")
+                    stmt.execute("ALTER TABLE nation ADD COLUMN founder uuid NULL")
+
+                    stmt.execute("UPDATE database_meta SET version = 2 WHERE id = 'r'")
+                    Residential.instance.logger.info("Updated database schema to version 2")
+                }
             }
         }
 
         lateinit var connection: Connection
+        val connectionInitialized: Boolean = ::connection.isInitialized
     }
 }

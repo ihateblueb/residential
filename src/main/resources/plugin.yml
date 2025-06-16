@@ -4,3 +4,9 @@ main: me.blueb.residential.Residential
 api-version: '1.21'
 load: STARTUP
 authors: [ blueb ]
+
+softdepend:
+  - CMIEInjector
+  - EssentialsX
+depend:
+  - Vault

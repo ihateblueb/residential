@@ -1,17 +1,11 @@
-package me.blueb.residential.services
+package me.blueb.residential.util
 
-import java.sql.ResultSet
 import java.util.UUID
 
-class DatabaseService {
+class DatabaseUtil {
     companion object {
         fun extractUuid(string: String?): UUID? {
             return if (string != null) UUID.fromString(string) else null
-        }
-
-        fun getStringOrNull(rs: ResultSet, column: String): String? {
-            val value = rs.getString(column)
-            return if (rs.wasNull()) null else value
         }
 
         fun <T> extractList(string: String, converter: (String) -> T): List<T> {

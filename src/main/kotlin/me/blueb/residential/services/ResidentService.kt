@@ -1,7 +1,9 @@
 package me.blueb.residential.services
 
+import me.blueb.residential.Residential
 import me.blueb.residential.ResidentialDatabase
 import me.blueb.residential.models.Resident
+import me.blueb.residential.util.DatabaseUtil
 import java.util.UUID
 import kotlin.use
 
@@ -16,12 +18,12 @@ class ResidentService {
                     while (rs.next()) {
                         val rsClaims = rs.getString("claims")
                         val claims = if (!rs.wasNull())
-                            DatabaseService.extractList(rsClaims) { DatabaseService.extractUuid(it) }
+                            DatabaseUtil.extractList(rsClaims) { DatabaseUtil.extractUuid(it) }
                         else listOf()
 
                         val rsTrusted = rs.getString("claims")
                         val trusted = if (!rs.wasNull())
-                            DatabaseService.extractList(rsTrusted) { DatabaseService.extractUuid(it) }
+                            DatabaseUtil.extractList(rsTrusted) { DatabaseUtil.extractUuid(it) }
                         else listOf()
 
                         val resident = Resident(
@@ -56,6 +58,12 @@ class ResidentService {
                 trusted = listOf(),
                 town = null
             )
+        }
+
+        fun update(uuid: UUID) {
+            Residential.instance.server.getPlayer(uuid)?.let { player ->
+
+            }
         }
     }
 }

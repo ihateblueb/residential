@@ -1,34 +1,64 @@
 package me.blueb.residential.commands
 
 import com.mojang.brigadier.Command
+import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.Commands
+import me.blueb.residential.ResidentialConfig
 import me.blueb.residential.services.ResidentService
+import me.blueb.residential.util.CommandUtil
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.entity.Player
 
-@Suppress("UnstableApiUsage")
+@Suppress("UnstableApiUsage", "SameReturnValue")
 class TownCommand {
     companion object {
         fun create(): LiteralArgumentBuilder<CommandSourceStack> = Commands.literal("town")
             .executes { ctx -> run(ctx) }
+            .then(Commands.literal("new")
+                .requires { sender -> sender.sender.hasPermission("residential.town.new") }
+                .then(Commands.argument("name", StringArgumentType.string())
+                    .executes { ctx -> runNew(ctx) }
+                )
+            )
 
         private fun run(ctx: CommandContext<CommandSourceStack>): Int {
-            ctx.source.sender.sendMessage(Component.text("hello from /town!"))
-
-            if (ctx.source.executor !is Player) {
-                ctx.source.sender.sendMessage("Only players can run this command without arguments.")
-                return Command.SINGLE_SUCCESS
-            }
+            if (!CommandUtil.ensurePlayer(ctx)) return Command.SINGLE_SUCCESS
 
             val player = ctx.source.executor as Player
 
             val resident = ResidentService.get(player.uniqueId)
             val townUuid = resident?.town
 
-            player.sendMessage(Component.text(if (townUuid != null) "Town: $townUuid" else "You aren't apart of a town."))
+            if (townUuid == null) {
+                player.sendMessage(MiniMessage.miniMessage().deserialize("<red>You aren't in a town."))
+                return Command.SINGLE_SUCCESS
+            }
+
+            player.sendMessage(Component.text("Town: $townUuid"))
+
+            return Command.SINGLE_SUCCESS
+        }
+
+        private fun runNew(ctx: CommandContext<CommandSourceStack>): Int {
+            if (!CommandUtil.ensurePlayer(ctx)) return Command.SINGLE_SUCCESS
+
+            val name = ctx.getArgument("name", String::class.java)
+
+            if (name.isNullOrBlank()) {
+                ctx.source.sender.sendMessage(MiniMessage.miniMessage().deserialize("<red>Town name cannot be blank."))
+                return Command.SINGLE_SUCCESS
+            }
+
+            if (name.length > ResidentialConfig.config.town.name.maxLength) {
+                ctx.source.sender.sendMessage(MiniMessage.miniMessage().deserialize("<red>Town name cannot be longer than ${ResidentialConfig.config.town.name.maxLength} characters."))
+                return Command.SINGLE_SUCCESS
+            }
+
+            ctx.source.sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Supposed to create town: $name."))
 
             return Command.SINGLE_SUCCESS
         }

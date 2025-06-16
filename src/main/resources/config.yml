@@ -1,10 +1,13 @@
-resident:
-  maxTowns: 1
-
 town:
+  name:
+    maxLength: 20
+
   tag:
     enabled: true
     maxLength: 4
+
+  # Cost to create town
+  cost: 150
 
   # Allows towns to be abandoned without deleting them.
   # The town borders will remain, but no protections will.
@@ -26,9 +29,16 @@ town:
 # Nations allow pooling resources between towns
 nation:
   enabled: true
+
+  name:
+    maxLength: 24
+
   tag:
     enabled: true
     maxLength: 4
+
+  # Cost to create nation
+  cost: 1500
 
   # Allows collecting money automatically from towns or residents
   # Percent, interval, and cost are all configurable by nations
