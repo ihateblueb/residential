@@ -1,10 +1,13 @@
 package me.blueb.residential.services
 
+import me.blueb.residential.Residential
+import me.blueb.residential.ResidentialConfig
 import me.blueb.residential.ResidentialDatabase
 import me.blueb.residential.events.ResidentialTownCreationEvent
 import me.blueb.residential.models.GracefulCommandException
 import me.blueb.residential.models.Town
 import me.blueb.residential.util.DatabaseUtil
+import me.blueb.residential.util.LocationUtil
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -123,10 +126,24 @@ class TownService {
 
             ResidentialTownCreationEvent(uuid).callEvent()
 
+            Residential.economy.withdrawPlayer(Residential.instance.server.getOfflinePlayer(founder), ResidentialConfig.config.town.cost.toDouble())
+
             ResidentService.joinTown(founder, uuid)
             ChunkService.claim(uuid, homeChunk, world)
 
             return get(uuid)!!
+        }
+
+        fun teleport(town: UUID, player: UUID) {
+            val foundTown = get(town)
+
+            if (foundTown == null)
+                throw GracefulCommandException("Town doesn't exist.")
+
+            val player = Residential.instance.server.getPlayer(player)
+            // TODO: add spawnWorld for town, this is bad
+            // TODO: always faces south
+            player?.teleport(LocationUtil.stringToLocation(foundTown.spawn, player.world.name))
         }
     }
 }

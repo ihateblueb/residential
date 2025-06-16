@@ -13,6 +13,7 @@ import me.blueb.residential.services.ResidentService
 import me.blueb.residential.services.TownService
 import me.blueb.residential.util.ChunkUtil
 import me.blueb.residential.util.CommandUtil
+import me.blueb.residential.util.LocationUtil
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.entity.Player
@@ -26,6 +27,13 @@ class TownCommand {
                 .requires { sender -> sender.sender.hasPermission("residential.town.new") }
                 .then(Commands.argument("name", StringArgumentType.string())
                     .executes { ctx -> runNew(ctx) }
+                )
+            )
+            .then(Commands.literal("spawn")
+                .requires { sender -> sender.sender.hasPermission("residential.town.spawn") }
+                .executes { ctx -> runSpawn(ctx) }
+                .then(Commands.argument("name", StringArgumentType.string())
+                    .executes { ctx -> runSpawnSpecific(ctx) }
                 )
             )
 
@@ -43,6 +51,39 @@ class TownCommand {
             }
 
             player.sendMessage(Component.text("Town: $townUuid"))
+
+            return Command.SINGLE_SUCCESS
+        }
+
+        private fun runSpawn(ctx: CommandContext<CommandSourceStack>): Int {
+            if (!CommandUtil.ensurePlayer(ctx)) return Command.SINGLE_SUCCESS
+            val player = ctx.source.sender as Player
+            val resident = ResidentService.get(player.uniqueId)
+
+            if (resident?.town == null) {
+                player.sendMessage(MiniMessage.miniMessage().deserialize("<red>You aren't in a town, please specify one to teleport to."))
+                return Command.SINGLE_SUCCESS
+            }
+
+            TownService.teleport(resident.town, player.uniqueId)
+
+            return Command.SINGLE_SUCCESS
+        }
+
+        private fun runSpawnSpecific(ctx: CommandContext<CommandSourceStack>): Int {
+            if (!CommandUtil.ensurePlayer(ctx)) return Command.SINGLE_SUCCESS
+            val player = ctx.source.executor as Player
+
+            val name = ctx.getArgument("name", String::class.java)
+
+            val town = TownService.getByName(name)
+
+            if (town == null) {
+                player.sendMessage(MiniMessage.miniMessage().deserialize("<red>Town doesn't exist."))
+                return Command.SINGLE_SUCCESS
+            }
+
+            TownService.teleport(town.uuid, player.uniqueId)
 
             return Command.SINGLE_SUCCESS
         }
@@ -75,7 +116,7 @@ class TownCommand {
             val homeChunk = player.chunk
 
             try {
-                TownService.register(name, player.uniqueId, ChunkUtil.chunkToString(homeChunk), player.world.name, player.location.toString())
+                TownService.register(name, player.uniqueId, ChunkUtil.chunkToString(homeChunk), player.world.name, LocationUtil.locationToString(player.location))
             } catch (e: GracefulCommandException) {
                 player.sendMessage(MiniMessage.miniMessage().deserialize("<red>${e.message}"))
                 return Command.SINGLE_SUCCESS
