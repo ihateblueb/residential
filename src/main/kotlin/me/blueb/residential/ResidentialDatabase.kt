@@ -24,7 +24,7 @@ class ResidentialDatabase {
 
                 Residential.instance.logger.info("Current database schema version is $version")
 
-                if (version == 0) {
+                if (version <= 0) {
                     stmt.execute("CREATE TABLE resident(uuid uuid primary key)")
 
                     stmt.execute("ALTER TABLE resident ADD COLUMN claims json NULL")
@@ -53,7 +53,7 @@ class ResidentialDatabase {
                     Residential.instance.logger.info("Updated database schema to version 1")
                 }
 
-                if (version == 1) {
+                if (version <= 1) {
                     stmt.execute("ALTER TABLE resident ADD COLUMN name varchar(16)")
 
                     stmt.execute("ALTER TABLE town ADD COLUMN name varchar(125)")
@@ -67,7 +67,7 @@ class ResidentialDatabase {
                     Residential.instance.logger.info("Updated database schema to version 2")
                 }
 
-                if (version == 2) {
+                if (version <= 2) {
                     stmt.execute("ALTER TABLE town ADD COLUMN foundedAt varchar(125)")
 
                     stmt.execute("ALTER TABLE nation ADD COLUMN foundedAt varchar(125)")
@@ -76,7 +76,7 @@ class ResidentialDatabase {
                     Residential.instance.logger.info("Updated database schema to version 3")
                 }
 
-                if (version == 3) {
+                if (version <= 3) {
                     stmt.execute("CREATE TABLE chunk(location varchar(64) primary key);")
 
                     stmt.execute("ALTER TABLE chunk ADD COLUMN town uuid NULL")
@@ -98,11 +98,54 @@ class ResidentialDatabase {
                     Residential.instance.logger.info("Updated database schema to version 4")
                 }
 
-                if (version == 4) {
+                if (version <= 4) {
                     stmt.execute("ALTER TABLE chunk ADD COLUMN world varchar(64)")
 
                     stmt.execute("UPDATE database_meta SET version = 5 WHERE id = 'r'")
                     Residential.instance.logger.info("Updated database schema to version 5")
+                }
+
+                if (version <= 5) {
+                    stmt.execute("CREATE TABLE town_permission(town uuid primary key);")
+
+                    stmt.execute("ALTER TABLE town_permission ADD COLUMN plot uuid NULL")
+
+                    // 0: any entity
+                    // 1: any non-hostile entity
+                    // 2: any player
+                    // 3: any resident
+                    stmt.execute("ALTER TABLE town_permission ADD COLUMN enter int default 1")
+                    stmt.execute("ALTER TABLE town_permission ADD COLUMN break int default 3")
+                    stmt.execute("ALTER TABLE town_permission ADD COLUMN place int default 3")
+                    stmt.execute("ALTER TABLE town_permission ADD COLUMN use int default 3")
+
+                    stmt.execute("ALTER TABLE town_permission ADD COLUMN cmd_spawn int default 2") // t spawn
+
+                    stmt.execute("CREATE TABLE town_role(uuid uuid primary key);")
+
+                    stmt.execute("ALTER TABLE town_role ADD COLUMN name varchar(32)")
+
+                    stmt.execute("ALTER TABLE town_role ADD COLUMN town uuid")
+
+                    stmt.execute("ALTER TABLE town_role ADD COLUMN is_default boolean default false") // will make default role every resident gets
+
+                    stmt.execute("ALTER TABLE town_role ADD COLUMN bank_withdraw boolean default false")
+                    stmt.execute("ALTER TABLE town_role ADD COLUMN bank_deposit boolean default true")
+
+                    stmt.execute("ALTER TABLE town_role ADD COLUMN cmd_plot_management boolean default false")
+                    stmt.execute("ALTER TABLE town_role ADD COLUMN cmd_mayor boolean default false")
+
+                    stmt.execute("UPDATE database_meta SET version = 6 WHERE id = 'r'")
+                    Residential.instance.logger.info("Updated database schema to version 6")
+                }
+
+                if (version <= 6) {
+                    stmt.execute("ALTER TABLE town_role ADD COLUMN is_mayor boolean default false")
+                    stmt.execute("ALTER TABLE town ADD COLUMN mayor uuid NULL")
+                    stmt.execute("ALTER TABLE resident ADD COLUMN roles json NULL")
+
+                    stmt.execute("UPDATE database_meta SET version = 7 WHERE id = 'r'")
+                    Residential.instance.logger.info("Updated database schema to version 7")
                 }
             }
         }

@@ -15,6 +15,49 @@ town:
   # Cost to create town
   cost: 150
 
+  claimableChunks:
+    # Maximum amount of chunks able to be claimed
+    max: 200
+    # Initial cost to claim chunk. One time
+    cost: 50
+    # Additional tax cost for each additional chunk. Repeated
+    tax: 15
+
+  # Default permissions for a town's chunks
+  #   0: Any entities
+  #   1: Non-hostile entities only
+  #   2: Players only
+  #   3: Residents only
+  permissions:
+    # Entering a town chunk
+    enter: 1
+    # Breaking blocks
+    destroy: 3
+    # Placing blocks
+    place: 3
+    # Using items, eg. buttons
+    use: 3
+    # /t spawn
+    cmdSpawn: 2
+
+  roles:
+    max: 15
+    # Each line is a default role that will be created with each town.
+    # At least one is_default and is_mayor role required.
+    # Parameters:
+    #   name
+    #   is_default          (if true, residents will be assigned this role)
+    #   is_mayor            (will own town)
+    #   bank_withdraw       (withdraw from town's collective bank)
+    #   bank_deposit        (deposit to town's collective bank)
+    #   cmd_plot_management (can create, delete, edit plots)
+    #   cmd_mayor           (general town management)
+    default:
+      - Mayor,false,true,true,true,true,true
+      - Treasurer,false,false,true,true,false,false
+      - Land Manager,false,false,false,false,true,false
+      - Resident,true,false,false,true,false,false
+
   # Allows towns to be abandoned without deleting them.
   # The town borders will remain, but no protections will.
   abandonment: true

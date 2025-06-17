@@ -7,7 +7,7 @@ import org.bukkit.event.HandlerList
 import org.jetbrains.annotations.ApiStatus
 
 @ApiStatus.OverrideOnly
-open class ResidentialChunkEvent(val chunk: Chunk) : Event(), Cancellable {
+open class ResidentialChunkEvent(val chunk: Chunk?) : Event(), Cancellable {
     private var cancelled: Boolean = false
     override fun isCancelled(): Boolean = cancelled
     override fun setCancelled(cancel: Boolean) {

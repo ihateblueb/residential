@@ -1,7 +1,9 @@
 package me.blueb.residential
 
+import me.blueb.residential.services.TownRoleService
 import net.milkbowl.vault.economy.Economy
 import org.bukkit.plugin.java.JavaPlugin
+import kotlin.concurrent.thread
 import kotlin.time.measureTime
 
 class Residential : JavaPlugin() {
@@ -38,6 +40,13 @@ class Residential : JavaPlugin() {
             ResidentialListeners.register()
         }
         instance.logger.info("Registered hooks in ${registrationTimeTaken.inWholeMilliseconds} ms")
+
+        thread(name = "ResidentialSyncThread") {
+            try {
+                instance.logger.info("Syncing town roles...")
+                TownRoleService.syncRoles()
+            } finally { instance.logger.info("Town role sync completed.") }
+        }
     }
 
     override fun onDisable() {
