@@ -44,13 +44,21 @@ class TownCommand {
 
             val resident = ResidentService.get(player.uniqueId)
             val townUuid = resident?.town
-
             if (townUuid == null) {
                 player.sendMessage(MiniMessage.miniMessage().deserialize("<red>You aren't in a town."))
                 return Command.SINGLE_SUCCESS
             }
 
-            player.sendMessage(Component.text("Town: $townUuid"))
+            val town = TownService.get(townUuid)
+            if (town == null) {
+                player.sendMessage(MiniMessage.miniMessage().deserialize("<red>Town couldn't be found."))
+                return Command.SINGLE_SUCCESS
+            }
+
+            player.sendMessage(MiniMessage.miniMessage().deserialize("<dark_gray> -- <yellow>town<dark_gray> --"))
+            player.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Founded at ${town.foundedAt} by ${town.founder}"))
+            player.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Spawn: ${town.spawn} Home: ${town.homeChunk}"))
+            player.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Abandoned: ${town.abandoned} Nation: ${town.nation}"))
 
             return Command.SINGLE_SUCCESS
         }
@@ -101,15 +109,15 @@ class TownCommand {
                 return Command.SINGLE_SUCCESS
             }
 
-            if (name.length > ResidentialConfig.config.town.name.maxLength) {
-                player.sendMessage(MiniMessage.miniMessage().deserialize("<red>Town name cannot be longer than ${ResidentialConfig.config.town.name.maxLength} characters."))
+            if (name.length > ResidentialConfig.config.town!!.name.maxLength) {
+                player.sendMessage(MiniMessage.miniMessage().deserialize("<red>Town name cannot be longer than ${ResidentialConfig.config.town!!.name.maxLength} characters."))
                 return Command.SINGLE_SUCCESS
             }
 
             val balance = Residential.economy.getBalance(player)
 
-            if (balance < ResidentialConfig.config.town.cost) {
-                player.sendMessage(MiniMessage.miniMessage().deserialize("<red>You cannot afford creating a town, which costs ${Residential.economy.format(ResidentialConfig.config.town.cost.toDouble())}."))
+            if (balance < ResidentialConfig.config.town!!.cost) {
+                player.sendMessage(MiniMessage.miniMessage().deserialize("<red>You cannot afford creating a town, which costs ${Residential.economy.format(ResidentialConfig.config.town!!.cost.toDouble())}."))
                 return Command.SINGLE_SUCCESS
             }
 

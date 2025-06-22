@@ -1,3 +1,28 @@
+#
+#   RESIDENTIAL
+#
+
+# Important: SQLite is not recommended for running in production.
+# SQLite is very limited compared to standard databases, and will
+# not be able to handle the pressure of this plugin running with
+# many players.
+#
+# Consider using Postgres or MySQL as an alternative.
+# Changing this will reset the Residential data of your server.
+#
+# options: sqlite, mysql, postgres
+database: "sqlite"
+#
+# If you're using something besides sqlite:
+# uncomment and fill in the configuration below.
+#
+# db-connection:
+#   host: 127.0.0.1
+#   port: 5432 # likely 5432 for Postgres, 3306 for MySQL
+#   name: residential
+#   user: residential
+#   password: residential
+
 # Residential will only allow function in these worlds.
 worlds:
   - "world"
@@ -6,16 +31,16 @@ worlds:
 
 town:
   name:
-    maxLength: 20
+    max-length: 20
 
   tag:
     enabled: true
-    maxLength: 4
+    max-length: 4
 
   # Cost to create town
   cost: 150
 
-  claimableChunks:
+  claimable-chunks:
     # Maximum amount of chunks able to be claimed
     max: 200
     # Initial cost to claim chunk. One time
@@ -38,7 +63,7 @@ town:
     # Using items, eg. buttons
     use: 3
     # /t spawn
-    cmdSpawn: 2
+    cmd-spawn: 2
 
   roles:
     max: 15
@@ -62,18 +87,25 @@ town:
   # The town borders will remain, but no protections will.
   abandonment: true
 
-  # Allows collecting money automatically from residents
-  # Percent, interval, and cost are all configurable by towns
-  # These are just default values
+  # Allows collecting money automatically from towns and residents
+  # Server tax will take from the town balance and be deleted.
+  # Percent, interval, and cost are all configurable by towns for resident tax
   tax:
-    enabled: true
-    percent: false
-    # In Residential days
-    interval: 1
-    cost: 5
+    server:
+      enabled: true
+      percent: false
+      # In Residential days
+      interval: 1
+      cost: 5
+    resident:
+      enabled: true
+      percent: false
+      # In Residential days
+      interval: 1
+      cost: 5
 
   # Set to 0 for no limit
-  balanceLimit: 0
+  balance-limit: 0
 
 # Nations allow pooling resources between towns
 nation:
@@ -84,7 +116,7 @@ nation:
 
   tag:
     enabled: true
-    maxLength: 4
+    max-length: 4
 
   # Cost to create nation
   cost: 1500
@@ -102,4 +134,4 @@ nation:
     cost: 15
 
   # Set to 0 for no limit
-  balanceLimit: 0
+  balance-limit: 0

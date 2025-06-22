@@ -4,9 +4,20 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable
 
 @ConfigSerializable
 data class Config(
+    val database: String = "sqlite",
+    val dbConnection: DbConnectionConfig? = DbConnectionConfig(),
     val worlds: List<String> = listOf("world", "world_nether", "world_the_end"),
     val town: TownConfig = TownConfig(),
     val nation: NationConfig = NationConfig(),
+)
+
+@ConfigSerializable
+data class DbConnectionConfig(
+    val host: String? = "127.0.0.1",
+    val port: String? = "5432",
+    val name: String? = "residential",
+    val user: String? = null,
+    val password: String? = null,
 )
 
 @ConfigSerializable

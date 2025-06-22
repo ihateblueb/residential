@@ -1,5 +1,8 @@
 package me.blueb.residential
 
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
+import com.zaxxer.hikari.pool.HikariPool
 import java.sql.Connection
 import java.sql.DriverManager
 
@@ -7,44 +10,113 @@ class ResidentialDatabase {
     init { throw AssertionError("This class is not intended to be initialized.") }
     companion object {
         fun connect() {
-            Class.forName("org.sqlite.JDBC")
-            connection = DriverManager.getConnection("jdbc:sqlite:${Residential.instance.dataPath}/database.db")
+            val type = ResidentialConfig.config.database
+            val config = ResidentialConfig.config.dbConnection
+            if (!listOf("sqlite", "postgres", "mysql").contains(type))
+                throw RuntimeException("Database type '$type' is invalid.")
+
+            fun checkConfigValues() {
+                if (config == null)
+                    throw RuntimeException("Database configuration is missing.")
+                if (config.host.isNullOrEmpty())
+                    throw RuntimeException("Database host is required.")
+                if (config.port.isNullOrEmpty())
+                    throw RuntimeException("Database host is required.")
+                if (config.name.isNullOrEmpty())
+                    throw RuntimeException("Database name is required.")
+                if (config.user.isNullOrEmpty())
+                    throw RuntimeException("Database user is required.")
+                if (config.password.isNullOrEmpty())
+                    throw RuntimeException("Database password is required.")
+            }
+
+            when (type) {
+                "sqlite" -> {
+                    Class.forName("org.sqlite.JDBC")
+                    connection = DriverManager.getConnection("jdbc:sqlite:${Residential.instance.dataPath}/database.db")
+                }
+                "postgres" -> {
+                    checkConfigValues()
+                    Class.forName("org.postgresql.Driver")
+
+                    val hikariConfig = HikariConfig()
+                    hikariConfig.jdbcUrl = "jdbc:postgresql://${config!!.host}:${config.port}/${config.name}"
+                    hikariConfig.username = config.user
+                    hikariConfig.password = config.password
+
+                    try {
+                        val hikariDs = HikariDataSource(hikariConfig)
+                        connection = hikariDs.connection
+                    } catch (e: Exception) {
+                        throw RuntimeException("Failed to initialize HikariDataSource: $e")
+                    }
+                }
+                "mysql" -> {
+                    checkConfigValues()
+                    Class.forName("com.mysql.cj.jdbc.Driver")
+
+                    val hikariConfig = HikariConfig()
+                    hikariConfig.jdbcUrl = "jdbc:mysql://${config!!.host}:${config.port}/${config.name}"
+                    hikariConfig.username = config.user
+                    hikariConfig.password = config.password
+
+                    try {
+                        val hikariDs = HikariDataSource(hikariConfig)
+                        connection = hikariDs.connection
+                    } catch (e: Exception) {
+                        throw RuntimeException("Failed to initialize HikariDataSource: $e")
+                    }
+                }
+            }
         }
 
+
         fun setup() {
+            val dbType = ResidentialConfig.config.database
+            val isMySQL = (dbType == "mysql")
+
+            /*
+            * mysql sucks ass and doesn't support uuid, technically sqlite doesn't either, but it doesn't mind it being set as the type.
+            * postgres runs better with it, so when dbType isn't mysql, this will set the column type to uuid instead of a varchar
+            * */
+            fun uuidOrVarchar() = if (isMySQL) "varchar(36)" else "uuid"
+
             connection.createStatement().use { stmt ->
                 stmt.execute("CREATE TABLE IF NOT EXISTS database_meta(id varchar(1) primary key default 'r', version int default 0)")
 
-                val version = stmt.executeQuery("SELECT version FROM database_meta WHERE id = 'r'").use { rs ->
+                val version: Int = stmt.executeQuery("SELECT version FROM database_meta WHERE id = 'r'").use { rs ->
                     if (!rs.isBeforeFirst) {
-                        stmt.execute("INSERT INTO database_meta DEFAULT VALUES")
+                        stmt.execute("INSERT INTO database_meta (id, version) VALUES ('r', 0)")
                         0
-                    } else rs.getInt("version")
+                    } else {
+                        if (isMySQL) rs.next()
+                        rs.getInt("version")
+                    }
                 }
 
                 Residential.instance.logger.info("Current database schema version is $version")
 
                 if (version <= 0) {
-                    stmt.execute("CREATE TABLE resident(uuid uuid primary key)")
+                    stmt.execute("CREATE TABLE resident(uuid ${uuidOrVarchar()} primary key)")
 
                     stmt.execute("ALTER TABLE resident ADD COLUMN claims json NULL")
                     stmt.execute("ALTER TABLE resident ADD COLUMN trusted json NULL")
 
-                    stmt.execute("CREATE TABLE plot(uuid uuid primary key)")
+                    stmt.execute("CREATE TABLE plot(uuid ${uuidOrVarchar()} primary key)")
 
-                    stmt.execute("ALTER TABLE plot ADD COLUMN owner uuid NULL")
+                    stmt.execute("ALTER TABLE plot ADD COLUMN owner ${uuidOrVarchar()} NULL")
                     stmt.execute("ALTER TABLE plot ADD COLUMN price int default 0")
                     stmt.execute("ALTER TABLE plot ADD COLUMN forSale boolean default false")
                     stmt.execute("ALTER TABLE plot ADD COLUMN trusted json NULL")
                     stmt.execute("ALTER TABLE plot ADD COLUMN chunks json NULL")
 
-                    stmt.execute("CREATE TABLE town(uuid uuid primary key);")
+                    stmt.execute("CREATE TABLE town(uuid ${uuidOrVarchar()} primary key);")
 
                     stmt.execute("ALTER TABLE town ADD COLUMN tag varchar(16) NULL")
                     stmt.execute("ALTER TABLE town ADD COLUMN residents json NULL")
                     stmt.execute("ALTER TABLE town ADD COLUMN chunks json NULL")
 
-                    stmt.execute("CREATE TABLE nation(uuid uuid primary key)")
+                    stmt.execute("CREATE TABLE nation(uuid ${uuidOrVarchar()} primary key)")
 
                     stmt.execute("ALTER TABLE nation ADD COLUMN tag varchar(16) NULL")
                     stmt.execute("ALTER TABLE nation ADD COLUMN towns json NULL")
@@ -57,11 +129,11 @@ class ResidentialDatabase {
                     stmt.execute("ALTER TABLE resident ADD COLUMN name varchar(16)")
 
                     stmt.execute("ALTER TABLE town ADD COLUMN name varchar(125)")
-                    stmt.execute("ALTER TABLE town ADD COLUMN founder uuid NULL")
+                    stmt.execute("ALTER TABLE town ADD COLUMN founder ${uuidOrVarchar()} NULL")
                     stmt.execute("ALTER TABLE town ADD COLUMN abandoned boolean default false")
 
                     stmt.execute("ALTER TABLE nation ADD COLUMN name varchar(125)")
-                    stmt.execute("ALTER TABLE nation ADD COLUMN founder uuid NULL")
+                    stmt.execute("ALTER TABLE nation ADD COLUMN founder ${uuidOrVarchar()} NULL")
 
                     stmt.execute("UPDATE database_meta SET version = 2 WHERE id = 'r'")
                     Residential.instance.logger.info("Updated database schema to version 2")
@@ -79,8 +151,8 @@ class ResidentialDatabase {
                 if (version <= 3) {
                     stmt.execute("CREATE TABLE chunk(location varchar(64) primary key);")
 
-                    stmt.execute("ALTER TABLE chunk ADD COLUMN town uuid NULL")
-                    stmt.execute("ALTER TABLE chunk ADD COLUMN plot uuid NULL")
+                    stmt.execute("ALTER TABLE chunk ADD COLUMN town ${uuidOrVarchar()} NULL")
+                    stmt.execute("ALTER TABLE chunk ADD COLUMN plot ${uuidOrVarchar()} NULL")
 
                     stmt.execute("ALTER TABLE town DROP COLUMN chunks")
                     stmt.execute("ALTER TABLE town DROP COLUMN residents")
@@ -88,8 +160,8 @@ class ResidentialDatabase {
                     stmt.execute("ALTER TABLE resident DROP COLUMN claims")
                     stmt.execute("ALTER TABLE nation DROP COLUMN towns")
 
-                    stmt.execute("ALTER TABLE resident ADD COLUMN town uuid NULL")
-                    stmt.execute("ALTER TABLE town ADD COLUMN nation uuid NULL")
+                    stmt.execute("ALTER TABLE resident ADD COLUMN town ${uuidOrVarchar()} NULL")
+                    stmt.execute("ALTER TABLE town ADD COLUMN nation ${uuidOrVarchar()} NULL")
                     stmt.execute("ALTER TABLE town ADD COLUMN homeChunk varchar(64) NULL")
                     stmt.execute("ALTER TABLE town ADD COLUMN spawn varchar(264) NULL")
                     stmt.execute("ALTER TABLE plot ADD COLUMN spawn varchar(264) NULL")
@@ -106,9 +178,9 @@ class ResidentialDatabase {
                 }
 
                 if (version <= 5) {
-                    stmt.execute("CREATE TABLE town_permission(town uuid primary key);")
+                    stmt.execute("CREATE TABLE town_permission(town ${uuidOrVarchar()} primary key);")
 
-                    stmt.execute("ALTER TABLE town_permission ADD COLUMN plot uuid NULL")
+                    stmt.execute("ALTER TABLE town_permission ADD COLUMN plot ${uuidOrVarchar()} NULL")
 
                     // 0: any entity
                     // 1: any non-hostile entity
@@ -117,15 +189,16 @@ class ResidentialDatabase {
                     stmt.execute("ALTER TABLE town_permission ADD COLUMN enter int default 1")
                     stmt.execute("ALTER TABLE town_permission ADD COLUMN break int default 3")
                     stmt.execute("ALTER TABLE town_permission ADD COLUMN place int default 3")
-                    stmt.execute("ALTER TABLE town_permission ADD COLUMN use int default 3")
+                    // mysql doesn't allow "use" as a column name, it's really stupid!
+                    stmt.execute("ALTER TABLE town_permission ADD COLUMN ${if (isMySQL) "`use`" else "use"} int default 3")
 
                     stmt.execute("ALTER TABLE town_permission ADD COLUMN cmd_spawn int default 2") // t spawn
 
-                    stmt.execute("CREATE TABLE town_role(uuid uuid primary key);")
+                    stmt.execute("CREATE TABLE town_role(uuid ${uuidOrVarchar()} primary key);")
 
                     stmt.execute("ALTER TABLE town_role ADD COLUMN name varchar(32)")
 
-                    stmt.execute("ALTER TABLE town_role ADD COLUMN town uuid")
+                    stmt.execute("ALTER TABLE town_role ADD COLUMN town ${uuidOrVarchar()}")
 
                     stmt.execute("ALTER TABLE town_role ADD COLUMN is_default boolean default false") // will make default role every resident gets
 
@@ -141,11 +214,26 @@ class ResidentialDatabase {
 
                 if (version <= 6) {
                     stmt.execute("ALTER TABLE town_role ADD COLUMN is_mayor boolean default false")
-                    stmt.execute("ALTER TABLE town ADD COLUMN mayor uuid NULL")
+                    stmt.execute("ALTER TABLE town ADD COLUMN mayor ${uuidOrVarchar()} NULL")
                     stmt.execute("ALTER TABLE resident ADD COLUMN roles json NULL")
 
                     stmt.execute("UPDATE database_meta SET version = 7 WHERE id = 'r'")
                     Residential.instance.logger.info("Updated database schema to version 7")
+                }
+
+                if (version <= 7) {
+                    stmt.execute("ALTER TABLE town ADD COLUMN abandonedAt varchar(125) NULL")
+
+                    stmt.execute("ALTER TABLE town ADD COLUMN tax int default 0")
+                    stmt.execute("ALTER TABLE town ADD COLUMN taxInterval int default 0")
+                    stmt.execute("ALTER TABLE town ADD COLUMN taxPercent boolean default false")
+
+                    stmt.execute("ALTER TABLE nation ADD COLUMN tax int default 0")
+                    stmt.execute("ALTER TABLE nation ADD COLUMN taxInterval int default 0")
+                    stmt.execute("ALTER TABLE nation ADD COLUMN taxPercent boolean default false")
+
+                    stmt.execute("UPDATE database_meta SET version = 8 WHERE id = 'r'")
+                    Residential.instance.logger.info("Updated database schema to version 8")
                 }
             }
         }

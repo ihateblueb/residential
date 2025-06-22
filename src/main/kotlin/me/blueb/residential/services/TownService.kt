@@ -52,7 +52,7 @@ class TownService {
         }
 
         fun register(name: String, founder: UUID, homeChunk: String, world: String, spawn: String): Town {
-            if (!ResidentialConfig.config.worlds.contains(world))
+            if (!ResidentialConfig.config.worlds!!.contains(world))
                 throw GracefulCommandException("You cannot create towns in this world.")
 
             val resident = ResidentService.get(founder)
@@ -89,7 +89,7 @@ class TownService {
 
             ResidentialTownCreationEvent(uuid).callEvent()
 
-            Residential.economy.withdrawPlayer(Residential.instance.server.getOfflinePlayer(founder), ResidentialConfig.config.town.cost.toDouble())
+            Residential.economy.withdrawPlayer(Residential.instance.server.getOfflinePlayer(founder), ResidentialConfig.config.town!!.cost.toDouble())
 
             TownRoleService.createDefaults(uuid)
             ResidentService.joinTown(founder, uuid)

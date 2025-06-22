@@ -23,9 +23,15 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")
     compileOnly("com.github.MilkBowl:VaultAPI:1.7")
+
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation(kotlin("reflect"))
+
+    implementation("org.spongepowered:configurate-core:4.2.0")
     implementation("org.spongepowered:configurate-yaml:4.2.0")
     implementation("org.spongepowered:configurate-extra-kotlin:4.2.0")
+
+    implementation("com.zaxxer:HikariCP:4.0.3")
 }
 
 tasks {

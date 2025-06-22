@@ -1,28 +1,29 @@
 package me.blueb.residential
 
 import me.blueb.residential.models.Config
-import org.spongepowered.configurate.CommentedConfigurationNode
+import org.spongepowered.configurate.kotlin.extensions.get
 import org.spongepowered.configurate.kotlin.objectMapperFactory
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader
 import kotlin.io.path.Path
 
 class ResidentialConfig {
-    init { throw AssertionError("This class is not intended to be initialized.") }
     companion object {
-        val loader: YamlConfigurationLoader = YamlConfigurationLoader.builder()
-            .path(Path("${Residential.instance.dataPath}/config.yml"))
-            .defaultOptions { options ->
-                options.serializers { builder ->
-                    builder.registerAnnotatedObjects(objectMapperFactory())
-                }
-            }
-            .build()
-
-        val node: CommentedConfigurationNode = loader.load()
-        var config: Config = node.get(Config::class.java) ?: Config()
+        lateinit var config: Config
 
         fun load() {
-            config
+            val loader = YamlConfigurationLoader.builder()
+                .path(Path("${Residential.instance.dataPath}/config.yml"))
+                .defaultOptions { options ->
+                    options.serializers { builder ->
+                        builder.registerAnnotatedObjects(objectMapperFactory())
+                    }
+                }
+                .build()
+
+            val node = loader.load()
+            config = node.get<Config>() ?: Config()
+
+            println(config)
         }
     }
 }

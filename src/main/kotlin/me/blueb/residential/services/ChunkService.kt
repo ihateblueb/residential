@@ -24,7 +24,7 @@ class ChunkService {
         /* Town */
 
         fun claim(town: UUID, location: String, world: String): Chunk? {
-            if (!ResidentialConfig.config.worlds.contains(world))
+            if (!ResidentialConfig.config.worlds!!.contains(world))
                 throw GracefulCommandException("You cannot claim chunks in this world.")
 
             val chunk = get(location, world)

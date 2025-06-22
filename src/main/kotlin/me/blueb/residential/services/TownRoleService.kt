@@ -36,7 +36,7 @@ class TownRoleService {
         fun getByTypeDefault(town: UUID): TownRole? {
             val connection = ResidentialDatabase.connection
 
-            connection.prepareStatement("SELECT * FROM town_role WHERE town = ? AND is_mayor = true").use { stmt ->
+            connection.prepareStatement("SELECT * FROM town_role WHERE town = ? AND is_default = true").use { stmt ->
                 stmt.setString(1, town.toString())
                 stmt.executeQuery().use { rs ->
                     return TownRole.fromRs(rs)
@@ -76,6 +76,7 @@ class TownRoleService {
 
             if (isDefault) {
                 val existingDefault = getByTypeDefault(town)
+                println(existingDefault)
                 if (existingDefault != null)
                     throw GracefulCommandException("Only one default role can exist.")
             }
@@ -121,7 +122,7 @@ class TownRoleService {
         }
 
         fun createDefaults(town: UUID) {
-            val configDefaults = ResidentialConfig.config.town.roles.default
+            val configDefaults = ResidentialConfig.config.town!!.roles.default
             for (role in configDefaults) {
                 val split = role.split(",")
 
@@ -142,7 +143,7 @@ class TownRoleService {
         }
 
         fun createDefaultRole(town: UUID) {
-            val configDefaults = ResidentialConfig.config.town.roles.default
+            val configDefaults = ResidentialConfig.config.town!!.roles.default
             val defaultRole = configDefaults.find { it.split(",")[1].toBoolean() }
             val split = defaultRole?.split(",") ?: listOf()
 
@@ -162,7 +163,7 @@ class TownRoleService {
         }
 
         fun createMayorRole(town: UUID) {
-            val configDefaults = ResidentialConfig.config.town.roles.default
+            val configDefaults = ResidentialConfig.config.town!!.roles.default
             val mayorRole = configDefaults.find { it.split(",")[2].toBoolean() }
             val split = mayorRole?.split(",") ?: listOf()
 
