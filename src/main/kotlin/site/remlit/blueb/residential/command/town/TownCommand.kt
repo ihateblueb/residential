@@ -16,17 +16,19 @@ import site.remlit.blueb.residential.service.TownService
 import site.remlit.blueb.residential.util.ChunkUtil
 import site.remlit.blueb.residential.util.LocationUtil
 import site.remlit.blueb.residential.util.MessageUtil
-import java.util.UUID
+import site.remlit.blueb.residential.util.UuidUtil
 
 @CommandAlias("town|t")
 @CommandPermission("residential.town")
 class TownCommand : BaseCommand() {
+    // todo: for town and the like: you can input nonsense and it just goes to your town
+
     @Default
     fun default(sender: CommandSender, args: Array<String>) {
         val player = sender as Player
 
         val resident = ResidentService.Companion.get(player.uniqueId)
-        val townUuid = if (args.getOrNull(0) != null) UUID.fromString(args[0]) else resident?.town
+        val townUuid = UuidUtil.fromStringOrNull(args.getOrNull(0)) ?: resident?.town
 
         if (townUuid == null) {
             MessageUtil.Companion.send(player, "<red>You aren't in a town, please specify one.")
@@ -85,20 +87,12 @@ class TownCommand : BaseCommand() {
         return
     }
 
-    @Subcommand("claim")
-    @CommandPermission("residential.town.claim")
-    fun claim(sender: CommandSender, args: Array<String>) {}
-
-    @Subcommand("delete")
-    @CommandPermission("residential.town.delete")
-    fun delete(sender: CommandSender, args: Array<String>) {}
-
     @Subcommand("spawn")
     @CommandPermission("residential.town.spawn")
     fun spawn(sender: CommandSender, args: Array<String>) {
         val player = sender as Player
         val resident = ResidentService.Companion.get(player.uniqueId)
-        val townUuid = if (args.getOrNull(0) != null) UUID.fromString(args[0]) else resident?.town
+        val townUuid = UuidUtil.fromStringOrNull(args.getOrNull(0)) ?: resident?.town
 
         if (townUuid == null) {
             MessageUtil.Companion.send(player, "<red>You aren't in a town, please specify one.")
@@ -113,4 +107,12 @@ class TownCommand : BaseCommand() {
 
         TownService.Companion.teleport(townUuid, player.uniqueId)
     }
+
+    @Subcommand("claim")
+    @CommandPermission("residential.town.claim")
+    fun claim(sender: CommandSender, args: Array<String>) { TODO() }
+
+    @Subcommand("delete")
+    @CommandPermission("residential.town.delete")
+    fun delete(sender: CommandSender, args: Array<String>) { TODO() }
 }

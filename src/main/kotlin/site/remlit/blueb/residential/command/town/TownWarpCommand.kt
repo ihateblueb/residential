@@ -14,13 +14,13 @@ class TownWarpCommand : BaseCommand() {
     // todo: ensure resident has perm, town has public warps, warp is public
     @Default
     @CommandPermission("residential.town.warp")
-    fun warp(sender: CommandSender, args: Array<String>) {} // teleport to warp
+    fun warp(sender: CommandSender, args: Array<String>) { TODO() } // teleport to warp
 
     @Subcommand("create")
     @CommandPermission("residential.town.warp.create")
-    fun warpCreate(sender: CommandSender, args: Array<String>) {}
+    fun warpCreate(sender: CommandSender, args: Array<String>) { TODO() }
 
     @Subcommand("delete")
     @CommandPermission("residential.town.warp.delete")
-    fun warpDelete(sender: CommandSender, args: Array<String>) {}
+    fun warpDelete(sender: CommandSender, args: Array<String>) { TODO() }
 }
