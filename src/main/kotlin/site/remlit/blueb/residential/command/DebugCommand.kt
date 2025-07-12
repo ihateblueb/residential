@@ -18,10 +18,9 @@ class DebugCommand : BaseCommand() {
     fun chunk(sender: CommandSender, args: Array<String>) {
         val player = sender as Player
 
-        val chunk = ChunkService.get(args.getOrNull(0) ?: ChunkUtil.chunkToString(player.chunk), player.world.name)
+        val chunk = ChunkService.get(args.getOrNull(0) ?: ChunkUtil.chunkToString(player.chunk))
 
         MessageUtil.send(player, "<dark_aqua>Debug (Chunk@${chunk?.location})")
-        MessageUtil.send(player, "<gold>World: <yellow>${chunk?.world}")
         MessageUtil.send(player, "<gold>Town: <yellow>${chunk?.town}")
         MessageUtil.send(player, "<gold>Plot: <yellow>${chunk?.plot}")
     }

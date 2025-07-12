@@ -5,7 +5,6 @@ import java.util.UUID
 
 data class Chunk(
     val location: String,
-    val world: String,
     val town: UUID?,
     val plot: UUID?,
 ) {
@@ -24,7 +23,6 @@ data class Chunk(
 
                 return Chunk(
                     location = rs.getString("location"),
-                    world = rs.getString("world"),
                     plot = plot,
                     town = town,
                 )
@@ -47,7 +45,6 @@ data class Chunk(
 
                 list.add(Chunk(
                     location = rs.getString("location"),
-                    world = rs.getString("world"),
                     plot = plot,
                     town = town,
                 ))

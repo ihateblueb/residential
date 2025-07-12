@@ -10,12 +10,11 @@ import kotlin.use
 
 class ChunkService {
     companion object {
-        fun get(location: String, world: String): Chunk? {
+        fun get(location: String): Chunk? {
             val connection = Database.connection
 
-            connection.prepareStatement("SELECT * FROM chunk WHERE location = ? AND world = ?").use { stmt ->
+            connection.prepareStatement("SELECT * FROM chunk WHERE location = ?").use { stmt ->
                 stmt.setString(1, location)
-                stmt.setString(2, world)
                 stmt.executeQuery().use { rs ->
                     return Chunk.fromRs(rs)
                 }
@@ -33,13 +32,14 @@ class ChunkService {
             }
         }
 
-        fun claim(town: UUID, location: String, world: String): Chunk? {
+        fun claim(town: UUID, location: String): Chunk? {
             val town = TownService.get(town)!!
+            val world = location.split(",")[2]
 
             if (!Configuration.config.worlds.contains(world))
                 throw GracefulCommandException("You cannot claim chunks in this world.")
 
-            val chunk = get(location, world)
+            val chunk = get(location)
 
             if (chunk != null)
                 throw GracefulCommandException("Chunk already claimed.")
@@ -50,29 +50,27 @@ class ChunkService {
 
             val connection = Database.connection
 
-            connection.prepareStatement("INSERT INTO chunk (location, world, town) VALUES (?, ?, ?)").use { stmt ->
+            connection.prepareStatement("INSERT INTO chunk (location, town) VALUES (?, ?)").use { stmt ->
                 stmt.setString(1, location)
-                stmt.setString(2, world)
-                stmt.setString(3, town.uuid.toString())
+                stmt.setString(2, town.uuid.toString())
                 stmt.execute()
             }
 
-            println("Chunk $location in $world claimed by ${town.name}")
+            println("Chunk $location claimed by ${town.name}")
 
-            val newChunk = get(location, world)!!
+            val newChunk = get(location)!!
 
             ChunkClaimEvent(newChunk).callEvent()
 
             return newChunk
         }
 
-        fun unclaim(location: String, world: String) { }
+        fun unclaim(location: String) { }
 
         /* Plot */
 
-        fun createPlot(town: UUID, location: String, world: String) { }
+        fun createPlot(town: UUID, location: String) { }
 
-        fun deletePlot(
-            location: String, world: String) { }
+        fun deletePlot(location: String) { }
     }
 }

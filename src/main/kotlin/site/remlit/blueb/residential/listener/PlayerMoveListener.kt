@@ -15,8 +15,8 @@ class PlayerMoveListener : Listener {
         if (event.from.chunk == event.to.chunk) return
         if (!Configuration.config.worlds!!.contains(event.to.world.name)) return
 
-        val fromChunk = ChunkService.get(ChunkUtil.chunkToString(event.from.chunk), event.from.world.name)
-        val toChunk = ChunkService.get(ChunkUtil.chunkToString(event.to.chunk), event.to.world.name)
+        val fromChunk = ChunkService.get(ChunkUtil.chunkToString(event.from.chunk))
+        val toChunk = ChunkService.get(ChunkUtil.chunkToString(event.to.chunk))
         val toTown = if (toChunk?.town != null) TownService.get(toChunk.town) else null
 
         if (fromChunk == null && toChunk != null && toTown != null) {

@@ -234,6 +234,16 @@ class Database {
                     stmt.execute("UPDATE database_meta SET version = 8 WHERE id = 'r'")
                     Residential.instance.logger.info("Updated database schema to version 8")
                 }
+
+                if (version <= 8) {
+                    stmt.execute("ALTER TABLE chunk DROP COLUMN world")
+                    stmt.execute("ALTER TABLE chunk DROP COLUMN location")
+
+                    stmt.execute("ALTER TABLE chunk ADD COLUMN location varchar(256)")
+
+                    stmt.execute("UPDATE database_meta SET version = 9 WHERE id = 'r'")
+                    Residential.instance.logger.info("Updated database schema to version 9")
+                }
             }
         }
 

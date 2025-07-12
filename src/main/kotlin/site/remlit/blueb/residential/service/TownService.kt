@@ -1,5 +1,7 @@
 package site.remlit.blueb.residential.service
 
+import net.kyori.adventure.key.Key
+import net.kyori.adventure.sound.Sound
 import site.remlit.blueb.residential.Residential
 import site.remlit.blueb.residential.Configuration
 import site.remlit.blueb.residential.Database
@@ -7,7 +9,9 @@ import site.remlit.blueb.residential.event.TownCreationEvent
 import site.remlit.blueb.residential.model.GracefulCommandException
 import site.remlit.blueb.residential.model.Resident
 import site.remlit.blueb.residential.model.Town
+import site.remlit.blueb.residential.util.ChunkUtil
 import site.remlit.blueb.residential.util.LocationUtil
+import site.remlit.blueb.residential.util.SoundUtil
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -58,7 +62,7 @@ class TownService {
         }
 
         fun register(name: String, founder: UUID, homeChunk: String, world: String, spawn: String): Town {
-            if (!Configuration.config.worlds!!.contains(world))
+            if (!Configuration.config.worlds.contains(world))
                 throw GracefulCommandException("You cannot create towns in this world.")
 
             val resident = ResidentService.get(founder)
@@ -74,7 +78,7 @@ class TownService {
             if (existingTown != null)
                 throw GracefulCommandException("A town with this name already exists.")
 
-            val chunk = ChunkService.Companion.get(homeChunk, world)
+            val chunk = ChunkService.get(homeChunk)
 
             if (chunk != null)
                 throw GracefulCommandException("Chunk already claimed.")
@@ -95,7 +99,7 @@ class TownService {
 
             TownCreationEvent(uuid).callEvent()
 
-            ChunkService.claim(uuid, homeChunk, world)
+            ChunkService.claim(uuid, homeChunk)
             ResidentService.joinTown(founder, uuid)
 
             TownRoleService.createDefaults(uuid)
@@ -111,10 +115,24 @@ class TownService {
             if (foundTown == null)
                 throw GracefulCommandException("Town doesn't exist.")
 
-            val player = Residential.instance.server.getPlayer(player)
-            // TODO: add spawnWorld for town, this is bad
-            // TODO: always faces south
-            player?.teleport(LocationUtil.stringToLocation(foundTown.spawn, player.world.name))
+            val player = Residential.instance.server.getPlayer(player)!!
+
+            SoundUtil.playTeleport(player)
+            player.teleport(LocationUtil.stringToLocation(foundTown.spawn, ChunkUtil.stringToChunk(foundTown.homeChunk)!!.world.name))
+        }
+
+        fun setSpawn(town: UUID, homeChunk: String, location: String) {
+            val chunk = ChunkService.get(homeChunk)
+
+            if (chunk == null || chunk.town != town)
+                throw GracefulCommandException("This chunk isn't claimed by your town.")
+
+            Database.connection.prepareStatement("UPDATE town SET homeChunk = ?, spawn = ? WHERE uuid = ?").use { stmt ->
+                stmt.setString(1, homeChunk)
+                stmt.setString(2, location)
+                stmt.setString(3, town.toString())
+                stmt.execute()
+            }
         }
     }
 }

@@ -51,10 +51,11 @@ class Residential : JavaPlugin() {
             Logger.info("Sync", "Sync thread interval set at $interval minutes")
 
             fun runSync() {
-                try {
+                val syncTimeTaken = measureTime {
                     Logger.info("Sync", "Syncing town roles...")
                     TownRoleService.syncRoles()
-                } finally { Logger.info("Sync", "Town role sync completed.") }
+                }
+                Logger.info("Sync", "Town role sync completed in ${syncTimeTaken.inWholeMilliseconds}ms.")
             }
 
             while (!Thread.interrupted()) {

@@ -85,7 +85,7 @@ class TownCommand : BaseCommand() {
         val homeChunk = player.chunk
 
         try {
-            TownService.Companion.register(name, player.uniqueId, ChunkUtil.chunkToString(homeChunk), player.world.name, LocationUtil.locationToString(player.location))
+            TownService.register(name, player.uniqueId, ChunkUtil.chunkToString(homeChunk), player.world.name, LocationUtil.locationToString(player.location))
         } catch (e: GracefulCommandException) {
             MessageUtil.Companion.send(player, "<red>${e.message}")
             return
@@ -134,7 +134,7 @@ class TownCommand : BaseCommand() {
         val chunk = ChunkUtil.chunkToString(player.chunk)
 
         try {
-            ChunkService.claim(resident.town, chunk, player.world.name)
+            ChunkService.claim(resident.town, chunk)
         } catch (e: GracefulCommandException) {
             MessageUtil.send(player, "<red>${e.message}")
             return
