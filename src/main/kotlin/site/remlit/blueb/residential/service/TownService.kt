@@ -5,6 +5,7 @@ import site.remlit.blueb.residential.Configuration
 import site.remlit.blueb.residential.Database
 import site.remlit.blueb.residential.event.TownCreationEvent
 import site.remlit.blueb.residential.model.GracefulCommandException
+import site.remlit.blueb.residential.model.Resident
 import site.remlit.blueb.residential.model.Town
 import site.remlit.blueb.residential.util.LocationUtil
 import java.time.LocalDateTime
@@ -51,6 +52,11 @@ class TownService {
             }
         }
 
+        fun getMayor(town: UUID): Resident? {
+            val role = TownRoleService.getByTypeMayor(town)!!
+            return ResidentService.getByRole(role.uuid)
+        }
+
         fun register(name: String, founder: UUID, homeChunk: String, world: String, spawn: String): Town {
             if (!Configuration.config.worlds!!.contains(world))
                 throw GracefulCommandException("You cannot create towns in this world.")
@@ -85,13 +91,16 @@ class TownService {
                 stmt.execute()
             }
 
-            TownCreationEvent(uuid).callEvent()
-
             Residential.economy.withdrawPlayer(Residential.instance.server.getPlayer(founder), Configuration.config.town.cost.toDouble())
 
-            TownRoleService.createDefaults(uuid)
-            ResidentService.joinTown(founder, uuid)
+            TownCreationEvent(uuid).callEvent()
+
             ChunkService.claim(uuid, homeChunk, world)
+            ResidentService.joinTown(founder, uuid)
+
+            TownRoleService.createDefaults(uuid)
+            val mayorRole = TownRoleService.getByTypeMayor(uuid)!!
+            TownRoleService.giveRole(founder, mayorRole.uuid)
 
             return get(uuid)!!
         }

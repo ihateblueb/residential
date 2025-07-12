@@ -1,5 +1,7 @@
 package site.remlit.blueb.residential.model
 
+import site.remlit.blueb.residential.Configuration
+import site.remlit.blueb.residential.service.TownService
 import site.remlit.blueb.residential.util.DatabaseUtil
 import java.sql.ResultSet
 import java.time.LocalDateTime
@@ -16,6 +18,9 @@ data class Town(
     val homeChunk: String,
     val spawn: String,
 ) {
+    fun getMayor() = TownService.getMayor(uuid)
+    fun getMaxChunks() = Configuration.config.town.claimableChunks.initial
+
     companion object {
         fun fromRs(rs: ResultSet): Town? {
             while (rs.next()) {

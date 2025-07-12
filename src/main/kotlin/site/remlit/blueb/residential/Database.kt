@@ -98,27 +98,27 @@ class Database {
                 if (version <= 0) {
                     stmt.execute("CREATE TABLE resident(uuid ${uuidOrVarchar()} primary key)")
 
-                    stmt.execute("ALTER TABLE resident ADD COLUMN claims json NULL")
-                    stmt.execute("ALTER TABLE resident ADD COLUMN trusted json NULL")
+                    stmt.execute("ALTER TABLE resident ADD COLUMN claims text NULL")
+                    stmt.execute("ALTER TABLE resident ADD COLUMN trusted text NULL")
 
                     stmt.execute("CREATE TABLE plot(uuid ${uuidOrVarchar()} primary key)")
 
                     stmt.execute("ALTER TABLE plot ADD COLUMN owner ${uuidOrVarchar()} NULL")
                     stmt.execute("ALTER TABLE plot ADD COLUMN price int default 0")
                     stmt.execute("ALTER TABLE plot ADD COLUMN forSale boolean default false")
-                    stmt.execute("ALTER TABLE plot ADD COLUMN trusted json NULL")
-                    stmt.execute("ALTER TABLE plot ADD COLUMN chunks json NULL")
+                    stmt.execute("ALTER TABLE plot ADD COLUMN trusted text NULL")
+                    stmt.execute("ALTER TABLE plot ADD COLUMN chunks text NULL")
 
                     stmt.execute("CREATE TABLE town(uuid ${uuidOrVarchar()} primary key);")
 
                     stmt.execute("ALTER TABLE town ADD COLUMN tag varchar(16) NULL")
-                    stmt.execute("ALTER TABLE town ADD COLUMN residents json NULL")
-                    stmt.execute("ALTER TABLE town ADD COLUMN chunks json NULL")
+                    stmt.execute("ALTER TABLE town ADD COLUMN residents text NULL")
+                    stmt.execute("ALTER TABLE town ADD COLUMN chunks text NULL")
 
                     stmt.execute("CREATE TABLE nation(uuid ${uuidOrVarchar()} primary key)")
 
                     stmt.execute("ALTER TABLE nation ADD COLUMN tag varchar(16) NULL")
-                    stmt.execute("ALTER TABLE nation ADD COLUMN towns json NULL")
+                    stmt.execute("ALTER TABLE nation ADD COLUMN towns text NULL")
 
                     stmt.execute("UPDATE database_meta SET version = 1 WHERE id = 'r'")
                     Residential.instance.logger.info("Updated database schema to version 1")
@@ -214,7 +214,7 @@ class Database {
                 if (version <= 6) {
                     stmt.execute("ALTER TABLE town_role ADD COLUMN is_mayor boolean default false")
                     stmt.execute("ALTER TABLE town ADD COLUMN mayor ${uuidOrVarchar()} NULL")
-                    stmt.execute("ALTER TABLE resident ADD COLUMN roles json NULL")
+                    stmt.execute("ALTER TABLE resident ADD COLUMN roles text NULL")
 
                     stmt.execute("UPDATE database_meta SET version = 7 WHERE id = 'r'")
                     Residential.instance.logger.info("Updated database schema to version 7")

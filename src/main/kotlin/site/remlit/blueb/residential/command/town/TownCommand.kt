@@ -11,6 +11,7 @@ import org.bukkit.entity.Player
 import site.remlit.blueb.residential.Configuration
 import site.remlit.blueb.residential.Residential
 import site.remlit.blueb.residential.model.GracefulCommandException
+import site.remlit.blueb.residential.service.ChunkService
 import site.remlit.blueb.residential.service.ResidentService
 import site.remlit.blueb.residential.service.TownService
 import site.remlit.blueb.residential.util.ChunkUtil
@@ -31,7 +32,7 @@ class TownCommand : BaseCommand() {
         val townUuid = UuidUtil.fromStringOrNull(args.getOrNull(0)) ?: resident?.town
 
         if (townUuid == null) {
-            MessageUtil.Companion.send(player, "<red>You aren't in a town, please specify one.")
+            MessageUtil.send(player, "<red>You aren't in a town, please specify one.")
             return
         }
 
@@ -41,10 +42,16 @@ class TownCommand : BaseCommand() {
             return
         }
 
-        player.sendMessage(MiniMessage.miniMessage().deserialize("<dark_gray> -- <yellow>${town.name}<dark_gray> --"))
-        player.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Founded at ${town.foundedAt} by ${town.founder}"))
-        player.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Spawn: ${town.spawn} Home: ${town.homeChunk}"))
-        player.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>Abandoned: ${town.abandoned} Nation: ${town.nation}"))
+        val founder = Residential.instance.server.getPlayer(town.founder)
+        val mayor = town.getMayor()?.getPlayer()
+
+        val allClaimedChunks = ChunkService.getAllClaimedChunks(town.uuid)
+
+        MessageUtil.send(player, MessageUtil.createLine(town.name))
+        MessageUtil.send(player, "Founded ${MessageUtil.formatLocalDateTime(town.foundedAt)}${if (founder != null) " by ${founder.name}" else ""}")
+        MessageUtil.send(player, "Mayor: ${mayor?.name}")
+        MessageUtil.send(player, "Claimed ${allClaimedChunks.size}/${town.getMaxChunks()}")
+        MessageUtil.send(player, MessageUtil.createLine())
     }
 
     @Subcommand("new")
@@ -78,7 +85,7 @@ class TownCommand : BaseCommand() {
         val homeChunk = player.chunk
 
         try {
-            TownService.Companion.register(name, player.uniqueId, ChunkUtil.Companion.chunkToString(homeChunk), player.world.name, LocationUtil.Companion.locationToString(player.location))
+            TownService.Companion.register(name, player.uniqueId, ChunkUtil.chunkToString(homeChunk), player.world.name, LocationUtil.locationToString(player.location))
         } catch (e: GracefulCommandException) {
             MessageUtil.Companion.send(player, "<red>${e.message}")
             return
@@ -110,7 +117,31 @@ class TownCommand : BaseCommand() {
 
     @Subcommand("claim")
     @CommandPermission("residential.town.claim")
-    fun claim(sender: CommandSender, args: Array<String>) { TODO() }
+    fun claim(sender: CommandSender, args: Array<String>) {
+        val player = sender as Player
+        val resident = ResidentService.get(player.uniqueId)
+
+        if (resident?.town == null) {
+            MessageUtil.send(player, "<red>You aren't in a town.")
+            return
+        }
+
+        if (resident.getTownRoles().find { it.cmdPlotManagement || it.cmdMayor } == null) {
+            MessageUtil.send(player, "<red>You do not have plot management permissions in this town.")
+            return
+        }
+
+        val chunk = ChunkUtil.chunkToString(player.chunk)
+
+        try {
+            ChunkService.claim(resident.town, chunk, player.world.name)
+        } catch (e: GracefulCommandException) {
+            MessageUtil.send(player, "<red>${e.message}")
+            return
+        }
+
+        MessageUtil.send(player, "<dark_green>Claimed chunk at $chunk")
+    }
 
     @Subcommand("delete")
     @CommandPermission("residential.town.delete")

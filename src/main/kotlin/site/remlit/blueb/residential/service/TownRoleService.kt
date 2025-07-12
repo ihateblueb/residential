@@ -5,6 +5,8 @@ import site.remlit.blueb.residential.Configuration
 import site.remlit.blueb.residential.Database
 import site.remlit.blueb.residential.model.GracefulCommandException
 import site.remlit.blueb.residential.model.TownRole
+import site.remlit.blueb.residential.util.DatabaseUtil
+import site.remlit.blueb.residential.util.UuidUtil
 import java.util.UUID
 import kotlin.use
 
@@ -76,7 +78,6 @@ class TownRoleService {
 
             if (isDefault) {
                 val existingDefault = getByTypeDefault(town)
-                println(existingDefault)
                 if (existingDefault != null)
                     throw GracefulCommandException("Only one default role can exist.")
             }
@@ -110,8 +111,17 @@ class TownRoleService {
 
         fun giveRole(player: UUID, role: UUID) {
             val resident = ResidentService.get(player)
+            if (resident == null)
+                throw Exception("No resident found by $player")
 
-            // give
+            val newList = resident.roles.toMutableList().apply { add(role) }
+            val json = DatabaseUtil.listToJson(newList) { it.toString() }
+            println(json)
+
+            Database.connection.prepareStatement("UPDATE resident SET roles = ?").use { stmt ->
+                stmt.setString(1, json)
+                stmt.executeUpdate()
+            }
         }
 
         fun setMayor(town: UUID, player: UUID) {

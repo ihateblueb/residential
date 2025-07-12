@@ -18,6 +18,17 @@ class ResidentService {
             }
         }
 
+        fun getByRole(uuid: UUID): Resident? {
+            val connection = Database.connection
+
+            connection.prepareStatement("SELECT * FROM resident WHERE roles LIKE ?").use { stmt ->
+                stmt.setString(1, "%\"$uuid\"%")
+                stmt.executeQuery().use { rs ->
+                    return Resident.fromRs(rs)
+                }
+            }
+        }
+
         fun register(uuid: UUID): Resident {
             val connection = Database.connection
 

@@ -25,7 +25,7 @@ data class TownConfig(
     val name: NameConfig = NameConfig(20),
     val tag: TagConfig = TagConfig(true, 4),
     val cost: Int = 150,
-    val claimableChunks: ClaimableChunksConfig = ClaimableChunksConfig(200, 50, 15),
+    val claimableChunks: ClaimableChunksConfig = ClaimableChunksConfig(500, 15, 50, 15),
     val permissions: PermissionsConfig = PermissionsConfig(1, 3, 3, 3, 2),
     val roles: RolesConfig = RolesConfig(15, listOf(
         "Mayor,false,true,true,true,true,true",
@@ -52,6 +52,7 @@ data class TagConfig(
 @ConfigSerializable
 data class ClaimableChunksConfig(
     val max: Int,
+    val initial: Int,
     val cost: Int,
     val tax: Int
 )

@@ -4,6 +4,7 @@ import co.aikar.commands.PaperCommandManager
 import site.remlit.blueb.residential.service.TownRoleService
 import net.milkbowl.vault.economy.Economy
 import org.bukkit.plugin.java.JavaPlugin
+import java.lang.Thread.sleep
 import kotlin.concurrent.thread
 import kotlin.time.measureTime
 
@@ -12,52 +13,64 @@ class Residential : JavaPlugin() {
         instance = this
 
         if (instance.server.pluginManager.getPlugin("Towny") != null) {
-            instance.logger.severe("Towny conflicts severely with Residential and it cannot run alongside it.")
+            Logger.severe("Towny conflicts severely with Residential and it cannot run alongside it.")
             instance.server.pluginManager.disablePlugin(this)
             return
         }
 
         val vaultTimeTaken = measureTime {
             if (instance.server.pluginManager.getPlugin("Vault") == null) {
-                instance.logger.severe("Vault is required to use Residential.")
+                Logger.severe("Vault is required to use Residential.")
                 instance.server.pluginManager.disablePlugin(this)
                 return
             }
             val rsp = instance.server.servicesManager.getRegistration(Economy::class.java)
             if (rsp == null) {
-                instance.logger.severe("An economy provider is required to use Residential.")
+                Logger.severe("An economy provider is required to use Residential.")
                 instance.server.pluginManager.disablePlugin(this)
                 return
             }
             economy = rsp.provider
         }
-        instance.logger.info("Vault setup in ${vaultTimeTaken.inWholeMilliseconds} ms")
+        Logger.info("Vault setup in ${vaultTimeTaken.inWholeMilliseconds} ms")
 
         val configTimeTaken = measureTime { Configuration.load() }
-        instance.logger.info("Loaded configuration in ${configTimeTaken.inWholeMilliseconds} ms")
+        Logger.info("Loaded configuration in ${configTimeTaken.inWholeMilliseconds} ms")
 
         val dbTimeTaken = measureTime {
             Database.connect()
             Database.setup()
         }
-        instance.logger.info("Connected to and setup database in ${dbTimeTaken.inWholeMilliseconds} ms")
+        Logger.info("Connected to and setup database in ${dbTimeTaken.inWholeMilliseconds} ms")
 
         Commands.register()
         EventListener.register()
 
         thread(name = "ResidentialSyncThread") {
-            try {
-                instance.logger.info("Syncing town roles...")
-                TownRoleService.syncRoles()
-            } finally { instance.logger.info("Town role sync completed.") }
+            val interval = 30L // minutes
+            Logger.info("Sync", "Sync thread interval set at $interval minutes")
+
+            fun runSync() {
+                try {
+                    Logger.info("Sync", "Syncing town roles...")
+                    TownRoleService.syncRoles()
+                } finally { Logger.info("Sync", "Town role sync completed.") }
+            }
+
+            while (!Thread.interrupted()) {
+                runSync()
+                sleep((interval * 60) * 1000)
+            }
         }
     }
 
     override fun onDisable() {
-        if (Database.connectionInitialized)
+        if (Database.connectionInitialized) {
+            Logger.info("Closing database connection...")
             Database.connection.close()
+        }
 
-        this.logger.info("Goodbye!")
+        Logger.info("Goodbye!")
     }
 
     companion object {
