@@ -42,9 +42,9 @@ town:
 
   claimable-chunks:
     # Maximum amount of chunks able to be claimed
-    max: 200
+    max: 500
     # Initial cost to claim chunk. One time
-    cost: 50
+    cost: 200
     # Additional tax cost for each additional chunk. Repeated
     tax: 15
 

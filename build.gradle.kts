@@ -4,7 +4,7 @@ plugins {
     id("xyz.jpenilla.run-paper") version "2.3.1"
 }
 
-group = "me.blueb"
+group = "site.remlit.blueb"
 version = "2025.5.1.0-SNAPSHOT"
 
 repositories {
@@ -18,20 +18,28 @@ repositories {
     maven("https://jitpack.io") {
         name = "jitpack"
     }
+
+    maven("https://repo.aikar.co/content/groups/aikar/") {
+        name = "aikar-repo"
+    }
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.20-R0.1-SNAPSHOT")
     compileOnly("com.github.MilkBowl:VaultAPI:1.7")
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation(kotlin("reflect"))
 
-    implementation("org.spongepowered:configurate-core:4.2.0")
     implementation("org.spongepowered:configurate-yaml:4.2.0")
     implementation("org.spongepowered:configurate-extra-kotlin:4.2.0")
 
-    implementation("com.zaxxer:HikariCP:4.0.3")
+    // supplied later by PluginLoader
+    compileOnly("com.zaxxer:HikariCP:6.3.0")
+    compileOnly("org.postgresql:postgresql:42.7.7")
+    compileOnly("com.mysql:mysql-connector-j:9.3.0")
+
+    compileOnly("co.aikar:acf-paper:0.5.1-SNAPSHOT")
 }
 
 tasks {
