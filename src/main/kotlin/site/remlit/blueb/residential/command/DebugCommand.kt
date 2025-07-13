@@ -23,44 +23,48 @@ class DebugCommand : BaseCommand() {
         "<dark_aqua>Debug ($type@$at)"
 
     @Subcommand("clock")
-    fun clock(sender: CommandSender, args: Array<String>) {
-        val player = sender as Player
+    fun clock(sender: CommandSender, args: Array<String>) =
+        safeCommand(sender) {
+            val player = sender as Player
 
-        MessageUtil.send(player, debugHeader("Clock", "server"))
-        MessageUtil.send(player, "<gold>Current state: <yellow>${Clock.clockState}/${Clock.maxClockState}")
-        MessageUtil.send(player, "<gold>In minutes: <yellow>${Clock.clockState * Clock.clockInterval}")
-    }
+            MessageUtil.send(player, debugHeader("Clock", "server"))
+            MessageUtil.send(player, "<gold>Current state: <yellow>${Clock.clockState}/${Clock.maxClockState}")
+            MessageUtil.send(player, "<gold>In minutes: <yellow>${Clock.clockState * Clock.clockInterval}")
+        }
 
     @Subcommand("chunk")
-    fun chunk(sender: CommandSender, args: Array<String>) {
-        val player = sender as Player
+    fun chunk(sender: CommandSender, args: Array<String>) =
+        safeCommand(sender) {
+            val player = sender as Player
 
-        val chunk = ChunkService.get(args.getOrNull(0) ?: ChunkUtil.chunkToString(player.chunk))
+            val chunk = ChunkService.get(args.getOrNull(0) ?: ChunkUtil.chunkToString(player.chunk))
 
-        MessageUtil.send(player, debugHeader("Chunk", "${chunk?.location}"))
-        MessageUtil.send(player, "<gold>Town: <yellow>${chunk?.town}")
-        MessageUtil.send(player, "<gold>Plot: <yellow>${chunk?.plot}")
-    }
+            MessageUtil.send(player, debugHeader("Chunk", "${chunk?.location}"))
+            MessageUtil.send(player, "<gold>Town: <yellow>${chunk?.town}")
+            MessageUtil.send(player, "<gold>Plot: <yellow>${chunk?.plot}")
+        }
 
     @Subcommand("town")
-    fun town(sender: CommandSender, args: Array<String>) {
-        val player = sender as Player
+    fun town(sender: CommandSender, args: Array<String>) =
+        safeCommand(sender) {
+            val player = sender as Player
 
-        val townUuid = UuidUtil.fromStringOrNull(args.getOrNull(0)) ?: ResidentService.get(player.uniqueId)?.town
-        val town = TownService.getByName(args.getOrNull(0) ?: "") ?: TownService.get(townUuid ?: UUID.randomUUID())
+            val townUuid = UuidUtil.fromStringOrNull(args.getOrNull(0)) ?: ResidentService.get(player.uniqueId)?.town
+            val town = TownService.getByName(args.getOrNull(0) ?: "") ?: TownService.get(townUuid ?: UUID.randomUUID())
 
-        MessageUtil.send(player, debugHeader("Town", "${town?.uuid}"))
-        MessageUtil.send(player, "<yellow>${town}")
-    }
+            MessageUtil.send(player, debugHeader("Town", "${town?.uuid}"))
+            MessageUtil.send(player, "<yellow>${town}")
+        }
 
     @Subcommand("resident")
-    fun resident(sender: CommandSender, args: Array<String>) {
-        val player = sender as Player
+    fun resident(sender: CommandSender, args: Array<String>) =
+        safeCommand(sender) {
+            val player = sender as Player
 
-        val residentUuid = UuidUtil.fromStringOrNull(args.getOrNull(0)) ?: player.uniqueId
-        val resident = ResidentService.get(residentUuid)
+            val residentUuid = UuidUtil.fromStringOrNull(args.getOrNull(0)) ?: player.uniqueId
+            val resident = ResidentService.get(residentUuid)
 
-        MessageUtil.send(player, debugHeader("Resident", "${resident?.uuid}"))
-        MessageUtil.send(player, "<yellow>${resident}")
-    }
+            MessageUtil.send(player, debugHeader("Resident", "${resident?.uuid}"))
+            MessageUtil.send(player, "<yellow>${resident}")
+        }
 }

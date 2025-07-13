@@ -1,6 +1,7 @@
 package site.remlit.blueb.residential.util
 
 import net.kyori.adventure.text.minimessage.MiniMessage
+import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import java.time.LocalDateTime
 import java.time.format.TextStyle
@@ -8,12 +9,12 @@ import java.util.Locale
 
 class MessageUtil {
     companion object {
-        fun send(player: Player, key: String) {
+        fun send(recipient: CommandSender, key: String) {
             /*val tagResolver =
                 TagResolver.resolver(placeholders.entries.map {
                     Placeholder.component(it.key, Component.text(it.value))
                 })*/
-            player.sendMessage {
+            recipient.sendMessage {
                 MiniMessage.miniMessage().deserialize(key)
             }
         }

@@ -12,6 +12,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import site.remlit.blueb.residential.Configuration
 import site.remlit.blueb.residential.Residential
+import site.remlit.blueb.residential.command.safeCommand
 import site.remlit.blueb.residential.model.GracefulCommandException
 import site.remlit.blueb.residential.service.ChunkService
 import site.remlit.blueb.residential.service.ResidentService
@@ -30,36 +31,33 @@ class TownCommand : BaseCommand() {
     @Default
     @Syntax("<town>")
     @Description("Get information about a town")
-    fun default(sender: CommandSender, args: Array<String>) {
-        val player = sender as Player
+    fun default(sender: CommandSender, args: Array<String>) =
+        safeCommand(sender) {
+            val player = sender as Player
 
-        val resident = ResidentService.Companion.get(player.uniqueId)
-        val townUuid = UuidUtil.fromStringOrNull(args.getOrNull(0)) ?: resident?.town
+            val resident = ResidentService.Companion.get(player.uniqueId)
+            val townUuid = UuidUtil.fromStringOrNull(args.getOrNull(0)) ?: resident?.town
 
-        if (townUuid == null) {
-            MessageUtil.send(player, "<red>You aren't in a town, please specify one.")
-            return
+            if (townUuid == null)
+                throw GracefulCommandException("<red>You aren't in a town, please specify one.")
+
+            val town = TownService.Companion.get(townUuid)
+            if (town == null)
+                throw GracefulCommandException("<red>Town doesn't exist.")
+
+            val founder = Residential.instance.server.getPlayer(town.founder)
+            val mayor = town.getMayor()?.getPlayer()
+
+            val allClaimedChunks = ChunkService.getAllClaimedChunks(town.uuid)
+
+            MessageUtil.send(player, MessageUtil.createLine(town.name))
+            MessageUtil.send(player, "Founded ${MessageUtil.formatLocalDateTime(town.foundedAt)}${if (founder != null) " by ${founder.name}" else ""}")
+            MessageUtil.send(player, "Mayor: ${mayor?.name}")
+            MessageUtil.send(player, "Balance: ${Residential.economy.format(town.balance)}")
+            MessageUtil.send(player, "Claimed ${allClaimedChunks.size}/${town.getMaxChunks()}")
+            MessageUtil.send(player, "Open: ${if (town.open) "T" else "F"} PVP: ${if (town.pvp) "T" else "F"} Mobs: ${if (town.mobs) "T" else "F"} Fire: ${if (town.fire) "T" else "F"}")
+            MessageUtil.send(player, MessageUtil.createLine())
         }
-
-        val town = TownService.Companion.get(townUuid)
-        if (town == null) {
-            MessageUtil.Companion.send(player, "<red>Town doesn't exist.")
-            return
-        }
-
-        val founder = Residential.instance.server.getPlayer(town.founder)
-        val mayor = town.getMayor()?.getPlayer()
-
-        val allClaimedChunks = ChunkService.getAllClaimedChunks(town.uuid)
-
-        MessageUtil.send(player, MessageUtil.createLine(town.name))
-        MessageUtil.send(player, "Founded ${MessageUtil.formatLocalDateTime(town.foundedAt)}${if (founder != null) " by ${founder.name}" else ""}")
-        MessageUtil.send(player, "Mayor: ${mayor?.name}")
-        MessageUtil.send(player, "Balance: ${Residential.economy.format(town.balance)}")
-        MessageUtil.send(player, "Claimed ${allClaimedChunks.size}/${town.getMaxChunks()}")
-        MessageUtil.send(player, "Open: ${if (town.open) "T" else "F"} PVP: ${if (town.pvp) "T" else "F"} Mobs: ${if (town.mobs) "T" else "F"} Fire: ${if (town.fire) "T" else "F"}")
-        MessageUtil.send(player, MessageUtil.createLine())
-    }
 
     @Subcommand("new")
     @Syntax("<town>")
