@@ -1,5 +1,6 @@
 package site.remlit.blueb.residential.util
 
+import java.sql.ResultSet
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -23,6 +24,25 @@ class DatabaseUtil {
             val stringList = mutableListOf<String>()
             list.forEach { stringList.add("\"${converter(it)}\"") }
             return "[${stringList.joinToString(",")}]"
+        }
+
+        inline fun <reified T> extractNullable(
+            rs: ResultSet,
+            name: String,
+            noinline listConverter: (String) -> Any? = { it }
+        ): T? {
+            val nullable =
+                when (T::class) {
+                    String::class, UUID::class, List::class -> rs.getString(name)
+                    Boolean::class -> rs.getBoolean(name)
+                    Int::class -> rs.getInt(name)
+                    Double::class -> rs.getDouble(name)
+                    else -> rs.getString(name)
+                }
+            return if (rs.wasNull()) null
+            else if (T::class == UUID::class) UuidUtil.fromStringOrNull(nullable as String) as? T
+            else if (T::class == List::class) extractList(nullable as String, listConverter) as? T
+            else nullable as? T
         }
     }
 }

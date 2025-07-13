@@ -272,6 +272,19 @@ class Database {
                     stmt.execute("UPDATE database_meta SET version = 12 WHERE id = 'r'")
                     Residential.instance.logger.info("Updated database schema to version 12")
                 }
+
+                if (version <= 12) {
+                    stmt.execute("ALTER TABLE town DROP COLUMN tax")
+                    stmt.execute("ALTER TABLE town DROP COLUMN taxInterval")
+
+                    stmt.execute("ALTER TABLE town ADD COLUMN tax double precision null default null")
+                    stmt.execute("ALTER TABLE town ADD COLUMN taxDebt boolean null default null")
+                    stmt.execute("ALTER TABLE town ADD COLUMN taxFeeMultiplier double precision null default null")
+                    stmt.execute("ALTER TABLE town ADD COLUMN taxMaxLate int null default null")
+
+                    stmt.execute("UPDATE database_meta SET version = 13 WHERE id = 'r'")
+                    Residential.instance.logger.info("Updated database schema to version 13")
+                }
             }
         }
 

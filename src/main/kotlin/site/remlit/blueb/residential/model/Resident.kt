@@ -26,26 +26,13 @@ data class Resident(
     companion object {
         fun fromRs(rs: ResultSet): Resident? {
             while (rs.next()) {
-                val rsTrusted = rs.getString("trusted")
-                val trusted = if (!rs.wasNull())
-                    DatabaseUtil.extractList(rsTrusted) { DatabaseUtil.extractUuid(it) }
-                else listOf()
-
-                val rsTown = rs.getString("town")
-                val town = if (!rs.wasNull())
-                    DatabaseUtil.extractUuid(rsTown)
-                else null
-
-                val rsRoles = rs.getString("roles")
-                val roles = if (!rs.wasNull())
-                    DatabaseUtil.extractList(rsRoles) { DatabaseUtil.extractUuid(it) }
-                else listOf()
-
                 return Resident(
                     uuid = UUID.fromString(rs.getString("uuid")),
-                    trusted = trusted,
-                    town = town,
-                    roles = roles
+                    trusted = DatabaseUtil.extractNullable<List<UUID>>(rs, "trusted") { DatabaseUtil.extractUuid(it) }
+                        ?: listOf(),
+                    town = DatabaseUtil.extractNullable<UUID>(rs, "town"),
+                    roles = DatabaseUtil.extractNullable<List<UUID>>(rs, "roles") { DatabaseUtil.extractUuid(it) }
+                        ?: listOf()
                 )
             }
             return null

@@ -34,7 +34,26 @@ data class TownConfig(
         "Resident,true,false,false,true,false,false"
     )),
     val abandonment: Boolean = true,
-    val tax: TaxConfig = TaxConfig(enabled = true, percent = false, interval = 1, cost = 5),
+    val tax: TownTaxConfig = TownTaxConfig(
+        TaxConfig(
+            enabled = true,
+            percent = false,
+            interval = 1,
+            cost = 25.0,
+            debt = true,
+            feeMultiplier = 1.75,
+            maxLate = 5
+        ),
+        TaxConfig(
+            enabled = true,
+            percent = false,
+            interval = 1,
+            cost = 5.0,
+            debt = true,
+            feeMultiplier = 1.75,
+            maxLate = 10
+        )
+    ),
     val balanceLimit: Int = 0
 )
 
@@ -73,11 +92,20 @@ data class RolesConfig(
 )
 
 @ConfigSerializable
+data class TownTaxConfig(
+    val server: TaxConfig,
+    val resident: TaxConfig,
+)
+
+@ConfigSerializable
 data class TaxConfig(
     val enabled: Boolean,
     val percent: Boolean,
     val interval: Int,
-    val cost: Int
+    val cost: Double,
+    val debt: Boolean,
+    val feeMultiplier: Double,
+    val maxLate: Int
 )
 
 @ConfigSerializable

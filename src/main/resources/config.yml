@@ -91,20 +91,37 @@ town:
 
   # Allows collecting money automatically from towns and residents
   # Server tax will take from the town balance and be deleted.
-  # Percent, interval, and cost are all configurable by towns for resident tax
+  # Resident tax will take from resident balance and add to town balance.
+  # Resident tax is configurable per-town.
   tax:
     server:
       enabled: true
       percent: false
       # In Residential days
       interval: 1
-      cost: 5
+      cost: 25
+      # Instead of immediately abandoning (or deleting if abandonment is off)
+      # allow the town to go in debt and collect late fees.
+      debt: true
+      # Multiplier used for calculating late fees
+      # (tax * days late) * multiplier
+      fee-multiplier: 1.75
+      # Maximum Residential days before abandoning (or deleting) town
+      max-late: 5
     resident:
       enabled: true
       percent: false
       # In Residential days
       interval: 1
       cost: 5
+      # Instead of immediately kicking a resident from a town
+      # allow the resident to go in debt and collect late fees.
+      debt: true
+      # Multiplier used for calculating late fees
+      # (tax * days late) * multiplier
+      fee-multiplier: 1.75
+      # Maximum Residential days before kicking from town
+      max-late: 10
 
   # Set to 0 for no limit
   balance-limit: 0
