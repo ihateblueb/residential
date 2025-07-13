@@ -244,6 +244,24 @@ class Database {
                     stmt.execute("UPDATE database_meta SET version = 9 WHERE id = 'r'")
                     Residential.instance.logger.info("Updated database schema to version 9")
                 }
+
+                if (version <= 9) {
+                    stmt.execute("ALTER TABLE town ADD COLUMN open boolean default false")
+
+                    stmt.execute("UPDATE database_meta SET version = 10 WHERE id = 'r'")
+                    Residential.instance.logger.info("Updated database schema to version 10")
+                }
+
+                if (version <= 10) {
+                    stmt.execute("ALTER TABLE town ADD COLUMN pvp boolean default false")
+                    stmt.execute("ALTER TABLE town ADD COLUMN mobs boolean default false")
+                    stmt.execute("ALTER TABLE town ADD COLUMN fire boolean default false")
+
+                    stmt.execute("ALTER TABLE town ADD COLUMN balance double precision default 0.0")
+
+                    stmt.execute("UPDATE database_meta SET version = 11 WHERE id = 'r'")
+                    Residential.instance.logger.info("Updated database schema to version 11")
+                }
             }
         }
 

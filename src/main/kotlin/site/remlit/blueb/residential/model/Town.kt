@@ -17,6 +17,13 @@ data class Town(
     val nation: UUID?,
     val homeChunk: String,
     val spawn: String,
+
+    val open: Boolean,
+    val pvp: Boolean,
+    val mobs: Boolean,
+    val fire: Boolean,
+
+    val balance: Double,
 ) {
     fun getMayor() = TownService.getMayor(uuid)
     fun getMaxChunks() = Configuration.config.town.claimableChunks.initial
@@ -44,6 +51,13 @@ data class Town(
                     nation = nation,
                     homeChunk = rs.getString("homeChunk"),
                     spawn = rs.getString("spawn"),
+
+                    open = rs.getBoolean("open"),
+                    pvp = rs.getBoolean("pvp"),
+                    mobs = rs.getBoolean("mobs"),
+                    fire = rs.getBoolean("fire"),
+
+                    balance = rs.getDouble("balance")
                 )
             }
             return null

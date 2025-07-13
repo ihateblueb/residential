@@ -50,5 +50,35 @@ data class Resident(
             }
             return null
         }
+
+        fun manyFromRs(rs: ResultSet): List<Resident> {
+            val list = mutableListOf<Resident>()
+            while (rs.next()) {
+                val rsTrusted = rs.getString("trusted")
+                val trusted = if (!rs.wasNull())
+                    DatabaseUtil.extractList(rsTrusted) { DatabaseUtil.extractUuid(it) }
+                else listOf()
+
+                val rsTown = rs.getString("town")
+                val town = if (!rs.wasNull())
+                    DatabaseUtil.extractUuid(rsTown)
+                else null
+
+                val rsRoles = rs.getString("roles")
+                val roles = if (!rs.wasNull())
+                    DatabaseUtil.extractList(rsRoles) { DatabaseUtil.extractUuid(it) }
+                else listOf()
+
+                list.add(
+                    Resident(
+                        uuid = UUID.fromString(rs.getString("uuid")),
+                        trusted = trusted,
+                        town = town,
+                        roles = roles
+                    )
+                )
+            }
+            return list.toList()
+        }
     }
 }

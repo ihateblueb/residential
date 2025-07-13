@@ -1,16 +1,18 @@
 package site.remlit.blueb.residential.service
 
-import net.kyori.adventure.key.Key
-import net.kyori.adventure.sound.Sound
 import site.remlit.blueb.residential.Residential
 import site.remlit.blueb.residential.Configuration
 import site.remlit.blueb.residential.Database
+import site.remlit.blueb.residential.Logger
+import site.remlit.blueb.residential.event.TownBankDepositEvent
+import site.remlit.blueb.residential.event.TownBankWithdrawEvent
 import site.remlit.blueb.residential.event.TownCreationEvent
 import site.remlit.blueb.residential.model.GracefulCommandException
 import site.remlit.blueb.residential.model.Resident
 import site.remlit.blueb.residential.model.Town
 import site.remlit.blueb.residential.util.ChunkUtil
 import site.remlit.blueb.residential.util.LocationUtil
+import site.remlit.blueb.residential.util.MessageUtil
 import site.remlit.blueb.residential.util.SoundUtil
 import java.time.LocalDateTime
 import java.util.UUID
@@ -43,9 +45,7 @@ class TownService {
         fun getAll(): Nothing = TODO()
 
         fun getAllUuids(): List<UUID> {
-            val connection = Database.connection
-
-            connection.prepareStatement("SELECT * FROM town WHERE abandoned = false").use { stmt ->
+                Database.connection.prepareStatement("SELECT * FROM town WHERE abandoned = false").use { stmt ->
                 val list = mutableListOf<UUID>()
                 stmt.executeQuery().use { rs ->
                     while (rs.next()) {
@@ -59,6 +59,25 @@ class TownService {
         fun getMayor(town: UUID): Resident? {
             val role = TownRoleService.getByTypeMayor(town)!!
             return ResidentService.getByRole(role.uuid)
+        }
+
+        fun getResidents(town: UUID): List<Resident> {
+            Database.connection.prepareStatement("SELECT * FROM resident WHERE town = ?").use { stmt ->
+                stmt.setString(1, town.toString())
+                stmt.executeQuery().use { rs ->
+                    return Resident.manyFromRs(rs)
+                }
+            }
+        }
+
+        fun broadcastToResidents(town: UUID, message: String) {
+            val town = get(town)!!
+            val residents = getResidents(town.uuid)
+            Logger.info("Broadcast", "${town.name}: $message")
+
+            for (resident in residents) {
+                MessageUtil.send(resident.getPlayer(), message)
+            }
         }
 
         fun register(name: String, founder: UUID, homeChunk: String, world: String, spawn: String): Town {
@@ -119,6 +138,51 @@ class TownService {
 
             SoundUtil.playTeleport(player)
             player.teleport(LocationUtil.stringToLocation(foundTown.spawn, ChunkUtil.stringToChunk(foundTown.homeChunk)!!.world.name))
+        }
+
+        private fun handleMoneyAdd(town: UUID, amount: Double) {
+            val town = get(town)!!
+            val calculatedAmount = town.balance + amount
+            Database.connection.prepareStatement("UPDATE town SET balance = ? WHERE uuid = ?").use { stmt ->
+                stmt.setDouble(1, calculatedAmount)
+                stmt.setString(2, town.uuid.toString())
+                stmt.execute()
+            }
+        }
+
+        fun deposit(town: UUID, amount: Double) {
+            handleMoneyAdd(town, amount)
+            TownBankDepositEvent(town, amount).callEvent()
+        }
+
+        fun withdraw(town: UUID, amount: Double) {
+            handleMoneyAdd(town, amount * -1)
+            TownBankWithdrawEvent(town, amount).callEvent()
+        }
+
+        fun setName(town: UUID, name: String) {
+            val townWithName = getByName(name)
+
+            if (townWithName != null && townWithName.uuid != town)
+                throw GracefulCommandException("This name has been taken.")
+
+            Database.connection.prepareStatement("UPDATE town SET name = ? WHERE uuid = ?").use { stmt ->
+                stmt.setString(1, name)
+                stmt.setString(2, town.toString())
+                stmt.execute()
+            }
+        }
+
+        fun setOpen(town: UUID, toggle: Boolean? = null): Boolean {
+            val changeTo = toggle ?: get(town)!!.open
+
+            Database.connection.prepareStatement("UPDATE town SET open = ? WHERE uuid = ?").use { stmt ->
+                stmt.setBoolean(1, changeTo)
+                stmt.setString(2, town.toString())
+                stmt.execute()
+            }
+
+            return changeTo
         }
 
         fun setSpawn(town: UUID, homeChunk: String, location: String) {

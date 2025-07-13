@@ -6,6 +6,7 @@ import co.aikar.commands.annotation.CommandPermission
 import co.aikar.commands.annotation.Default
 import co.aikar.commands.annotation.Subcommand
 import net.kyori.adventure.text.minimessage.MiniMessage
+import net.milkbowl.vault.economy.EconomyResponse
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import site.remlit.blueb.residential.Configuration
@@ -50,7 +51,9 @@ class TownCommand : BaseCommand() {
         MessageUtil.send(player, MessageUtil.createLine(town.name))
         MessageUtil.send(player, "Founded ${MessageUtil.formatLocalDateTime(town.foundedAt)}${if (founder != null) " by ${founder.name}" else ""}")
         MessageUtil.send(player, "Mayor: ${mayor?.name}")
+        MessageUtil.send(player, "Balance: ${Residential.economy.format(town.balance)}")
         MessageUtil.send(player, "Claimed ${allClaimedChunks.size}/${town.getMaxChunks()}")
+        MessageUtil.send(player, "Open: ${if (town.open) "T" else "F"} PVP: ${if (town.pvp) "T" else "F"} Mobs: ${if (town.mobs) "T" else "F"} Fire: ${if (town.fire) "T" else "F"}")
         MessageUtil.send(player, MessageUtil.createLine())
     }
 
@@ -146,4 +149,96 @@ class TownCommand : BaseCommand() {
     @Subcommand("delete")
     @CommandPermission("residential.town.delete")
     fun delete(sender: CommandSender, args: Array<String>) { TODO() }
+
+    @Subcommand("invite")
+    @CommandPermission("residential.town.invite")
+    fun invite(sender: CommandSender, args: Array<String>) { TODO() }
+
+    /*
+    * Bank
+    * */
+
+    @Subcommand("deposit")
+    @CommandPermission("residential.town.deposit")
+    fun deposit(sender: CommandSender, args: Array<String>) {
+        val player = sender as Player
+        val resident = ResidentService.get(player.uniqueId)
+
+        if (resident?.town == null) {
+            MessageUtil.send(player, "<red>You aren't in a town.")
+            return
+        }
+
+        if (resident.getTownRoles().find { it.bankDeposit || it.cmdMayor } == null) {
+            MessageUtil.send(player, "<red>You do not have bank deposit permissions in this town.")
+            return
+        }
+
+        val amount = args.getOrNull(0)?.toDoubleOrNull()
+
+        if (amount == null) {
+            MessageUtil.send(player, "<red>You must specify an amount.")
+            return
+        }
+
+        if (amount < 0.01) {
+            MessageUtil.send(player, "<red>You must deposit at least ${Residential.economy.format(0.01)}.")
+            return
+        }
+
+        if (Residential.economy.getBalance(player) < amount) {
+            MessageUtil.send(player, "<red>You don't have enough money.")
+            return
+        }
+
+        if (Residential.economy.withdrawPlayer(player, amount).type != EconomyResponse.ResponseType.SUCCESS) {
+            MessageUtil.send(player, "<red>Failed to withdraw from your account.")
+            return
+        } else {
+            TownService.deposit(resident.town, amount)
+        }
+    }
+
+    @Subcommand("withdraw")
+    @CommandPermission("residential.town.withdraw")
+    fun withdraw(sender: CommandSender, args: Array<String>) {
+        val player = sender as Player
+        val resident = ResidentService.get(player.uniqueId)
+
+        if (resident?.town == null) {
+            MessageUtil.send(player, "<red>You aren't in a town.")
+            return
+        }
+
+        if (resident.getTownRoles().find { it.bankWithdraw || it.cmdMayor } == null) {
+            MessageUtil.send(player, "<red>You do not have bank withdraw permissions in this town.")
+            return
+        }
+
+        val amount = args.getOrNull(0)?.toDoubleOrNull()
+
+        if (amount == null) {
+            MessageUtil.send(player, "<red>You must specify an amount.")
+            return
+        }
+
+        if (amount < 0.01) {
+            MessageUtil.send(player, "<red>You must withdraw at least ${Residential.economy.format(0.01)}.")
+            return
+        }
+
+        val town = TownService.get(resident.town)!!
+
+        if (town.balance < amount) {
+            MessageUtil.send(player, "<red>Your town doesn't have enough money.")
+            return
+        }
+
+        if (Residential.economy.depositPlayer(player, amount).type != EconomyResponse.ResponseType.SUCCESS) {
+            MessageUtil.send(player, "<red>Failed to deposit to your account.")
+            return
+        } else {
+            TownService.withdraw(resident.town, amount)
+        }
+    }
 }
