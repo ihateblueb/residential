@@ -45,8 +45,9 @@ class Residential : JavaPlugin() {
 
         Commands.register()
         EventListener.register()
+        Clock.start()
 
-        thread(name = "ResidentialSyncThread") {
+        thread(name = "Residential Sync Thread") {
             val interval = 30L // minutes
             Logger.info("Sync", "Sync thread interval set at $interval minutes")
 

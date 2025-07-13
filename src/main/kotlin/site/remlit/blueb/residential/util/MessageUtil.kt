@@ -2,18 +2,21 @@ package site.remlit.blueb.residential.util
 
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.entity.Player
-import org.bukkit.entity.TextDisplay
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
 class MessageUtil {
     companion object {
-        fun send(player: Player, message: String) =
+        fun send(player: Player, key: String) {
+            /*val tagResolver =
+                TagResolver.resolver(placeholders.entries.map {
+                    Placeholder.component(it.key, Component.text(it.value))
+                })*/
             player.sendMessage {
-                MiniMessage.miniMessage().deserialize(message)
+                MiniMessage.miniMessage().deserialize(key)
             }
+        }
 
         const val LINE_LENGTH = "--------------------------------------------------------------".length
 

@@ -60,17 +60,17 @@ class ChunkService {
 
             val newChunk = get(location)!!
 
-            ChunkClaimEvent(newChunk).callEvent()
+            ChunkClaimEvent(newChunk)
 
             return newChunk
         }
 
-        fun unclaim(location: String) { }
+        fun unclaim(location: String) {}
 
         /* Plot */
 
-        fun createPlot(town: UUID, location: String) { }
+        fun createPlot(town: UUID, location: String) {}
 
-        fun deletePlot(location: String) { }
+        fun deletePlot(location: String) {}
     }
 }

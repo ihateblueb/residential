@@ -3,7 +3,9 @@ package site.remlit.blueb.residential.command.town
 import co.aikar.commands.BaseCommand
 import co.aikar.commands.annotation.CommandAlias
 import co.aikar.commands.annotation.CommandPermission
+import co.aikar.commands.annotation.Description
 import co.aikar.commands.annotation.Subcommand
+import co.aikar.commands.annotation.Syntax
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import site.remlit.blueb.residential.model.GracefulCommandException
@@ -18,7 +20,9 @@ import site.remlit.blueb.residential.util.MessageUtil
 @CommandPermission("residential.town.set")
 class TownSetCommand : BaseCommand() {
     @Subcommand("name")
+    @Syntax("[name]")
     @CommandPermission("residential.town.set.name")
+    @Description("Change the name of your town")
     fun setName(sender: CommandSender, args: Array<String>) {
         val player = sender as Player
 
@@ -51,7 +55,9 @@ class TownSetCommand : BaseCommand() {
     }
 
     @Subcommand("open")
+    @Syntax("<open>")
     @CommandPermission("residential.town.set.open")
+    @Description("Toggle if your town is able to be joined without an invite")
     fun setOpen(sender: CommandSender, args: Array<String>) {
         val player = sender as Player
 
@@ -82,6 +88,7 @@ class TownSetCommand : BaseCommand() {
 
     @Subcommand("spawn")
     @CommandPermission("residential.town.set.spawn")
+    @Description("Change the spawn of your town")
     fun setSpawn(sender: CommandSender, args: Array<String>) {
         val player = sender as Player
 
@@ -111,10 +118,14 @@ class TownSetCommand : BaseCommand() {
     }
 
     @Subcommand("mayor")
+    @Syntax("[name]")
     @CommandPermission("residential.town.set.mayor")
+    @Description("Change the mayor of your town")
     fun setMayor(sender: CommandSender, args: Array<String>) { TODO() }
 
     @Subcommand("tag")
+    @Syntax("[tag]")
     @CommandPermission("residential.town.set.tag")
+    @Description("Change the tag of your town")
     fun setTag(sender: CommandSender, args: Array<String>) { TODO() }
 }

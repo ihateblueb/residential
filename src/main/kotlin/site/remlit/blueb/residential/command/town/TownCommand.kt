@@ -4,8 +4,9 @@ import co.aikar.commands.BaseCommand
 import co.aikar.commands.annotation.CommandAlias
 import co.aikar.commands.annotation.CommandPermission
 import co.aikar.commands.annotation.Default
+import co.aikar.commands.annotation.Description
 import co.aikar.commands.annotation.Subcommand
-import net.kyori.adventure.text.minimessage.MiniMessage
+import co.aikar.commands.annotation.Syntax
 import net.milkbowl.vault.economy.EconomyResponse
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -22,10 +23,13 @@ import site.remlit.blueb.residential.util.UuidUtil
 
 @CommandAlias("town|t")
 @CommandPermission("residential.town")
+@Description("Commands for managing towns")
 class TownCommand : BaseCommand() {
     // todo: for town and the like: you can input nonsense and it just goes to your town
 
     @Default
+    @Syntax("<town>")
+    @Description("Get information about a town")
     fun default(sender: CommandSender, args: Array<String>) {
         val player = sender as Player
 
@@ -58,7 +62,9 @@ class TownCommand : BaseCommand() {
     }
 
     @Subcommand("new")
+    @Syntax("<town>")
     @CommandPermission("residential.town.new")
+    @Description("Create a new town")
     fun new(sender: CommandSender, args: Array<String>) {
         val player = sender as Player
 
@@ -67,21 +73,19 @@ class TownCommand : BaseCommand() {
         // TODO: min distance between claimed areas
 
         if (name.isNullOrBlank()) {
-            player.sendMessage(MiniMessage.miniMessage().deserialize("<red>Town name cannot be blank."))
+            MessageUtil.send(player, "<red>Town name cannot be blank.")
             return
         }
 
         if (name.length > Configuration.Companion.config.town.name.maxLength) {
-            MessageUtil.Companion.send(player, "<red>Town name cannot be longer than ${Configuration.Companion.config.town.name.maxLength} characters.")
+            MessageUtil.send(player, "<red>Town name cannot be longer than ${Configuration.Companion.config.town.name.maxLength} characters.")
             return
         }
 
-        val balance = Residential.Companion.economy.getBalance(player)
+        val balance = Residential.economy.getBalance(player)
 
-        if (balance < Configuration.Companion.config.town.cost) {
-            MessageUtil.Companion.send(player, "<red>You cannot afford creating a town, which costs ${
-                Residential.Companion.economy.format(
-                    Configuration.Companion.config.town.cost.toDouble())}.")
+        if (balance < Configuration.config.town.cost) {
+            MessageUtil.send(player, "<red>You cannot afford creating a town, which costs ${Residential.economy.format(Configuration.config.town.cost.toDouble())}.")
             return
         }
 
@@ -98,7 +102,9 @@ class TownCommand : BaseCommand() {
     }
 
     @Subcommand("spawn")
+    @Syntax("<town>")
     @CommandPermission("residential.town.spawn")
+    @Description("Teleport to the spawn of a town")
     fun spawn(sender: CommandSender, args: Array<String>) {
         val player = sender as Player
         val resident = ResidentService.Companion.get(player.uniqueId)
@@ -120,6 +126,7 @@ class TownCommand : BaseCommand() {
 
     @Subcommand("claim")
     @CommandPermission("residential.town.claim")
+    @Description("Claim the current chunk you're standing in for you town")
     fun claim(sender: CommandSender, args: Array<String>) {
         val player = sender as Player
         val resident = ResidentService.get(player.uniqueId)
@@ -148,10 +155,13 @@ class TownCommand : BaseCommand() {
 
     @Subcommand("delete")
     @CommandPermission("residential.town.delete")
+    @Description("Delete your town")
     fun delete(sender: CommandSender, args: Array<String>) { TODO() }
 
     @Subcommand("invite")
+    @Syntax("[player]")
     @CommandPermission("residential.town.invite")
+    @Description("Invite a player to your town")
     fun invite(sender: CommandSender, args: Array<String>) { TODO() }
 
     /*
@@ -159,7 +169,9 @@ class TownCommand : BaseCommand() {
     * */
 
     @Subcommand("deposit")
+    @Syntax("[amount]")
     @CommandPermission("residential.town.deposit")
+    @Description("Deposit money to your town bank")
     fun deposit(sender: CommandSender, args: Array<String>) {
         val player = sender as Player
         val resident = ResidentService.get(player.uniqueId)
@@ -200,7 +212,9 @@ class TownCommand : BaseCommand() {
     }
 
     @Subcommand("withdraw")
+    @Syntax("[amount]")
     @CommandPermission("residential.town.withdraw")
+    @Description("Withdraw money from your town bank")
     fun withdraw(sender: CommandSender, args: Array<String>) {
         val player = sender as Player
         val resident = ResidentService.get(player.uniqueId)

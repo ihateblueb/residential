@@ -6,6 +6,7 @@ import co.aikar.commands.annotation.CommandPermission
 import co.aikar.commands.annotation.Subcommand
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import site.remlit.blueb.residential.Clock
 import site.remlit.blueb.residential.service.ChunkService
 import site.remlit.blueb.residential.util.ChunkUtil
 import site.remlit.blueb.residential.util.MessageUtil
@@ -14,6 +15,15 @@ import site.remlit.blueb.residential.util.MessageUtil
 @Subcommand("debug")
 @CommandPermission("residential.debug")
 class DebugCommand : BaseCommand() {
+    @Subcommand("clock")
+    fun clock(sender: CommandSender, args: Array<String>) {
+        val player = sender as Player
+
+        MessageUtil.send(player, "<dark_aqua>Debug Clock")
+        MessageUtil.send(player, "<gold>Current state: <yellow>${Clock.clockState}/${Clock.maxClockState}")
+        MessageUtil.send(player, "<gold>In minutes: <yellow>${Clock.clockState * Clock.clockInterval}")
+    }
+
     @Subcommand("chunk")
     fun chunk(sender: CommandSender, args: Array<String>) {
         val player = sender as Player

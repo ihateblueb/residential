@@ -262,6 +262,16 @@ class Database {
                     stmt.execute("UPDATE database_meta SET version = 11 WHERE id = 'r'")
                     Residential.instance.logger.info("Updated database schema to version 11")
                 }
+
+                if (version <= 11) {
+                    stmt.execute("CREATE TABLE clock (id varchar(1) primary key);")
+                    stmt.execute("ALTER TABLE clock ADD COLUMN state int default 0")
+
+                    stmt.execute("INSERT INTO clock (id, state) VALUES ('r', 0)")
+
+                    stmt.execute("UPDATE database_meta SET version = 12 WHERE id = 'r'")
+                    Residential.instance.logger.info("Updated database schema to version 12")
+                }
             }
         }
 
