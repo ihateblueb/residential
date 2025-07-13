@@ -14,6 +14,7 @@ data class Resident(
     val roles: List<UUID?>,
 ) {
     fun getPlayer(): Player = Residential.instance.server.getPlayer(uuid) ?: throw Exception("Resident couldn't be found")
+    fun getBalance(): Double = Residential.economy.getBalance(getPlayer())
     fun getTownRoles(): List<TownRole> {
         val townRoles = mutableListOf<TownRole>()
         if (town == null) return townRoles
@@ -41,27 +42,14 @@ data class Resident(
         fun manyFromRs(rs: ResultSet): List<Resident> {
             val list = mutableListOf<Resident>()
             while (rs.next()) {
-                val rsTrusted = rs.getString("trusted")
-                val trusted = if (!rs.wasNull())
-                    DatabaseUtil.extractList(rsTrusted) { DatabaseUtil.extractUuid(it) }
-                else listOf()
-
-                val rsTown = rs.getString("town")
-                val town = if (!rs.wasNull())
-                    DatabaseUtil.extractUuid(rsTown)
-                else null
-
-                val rsRoles = rs.getString("roles")
-                val roles = if (!rs.wasNull())
-                    DatabaseUtil.extractList(rsRoles) { DatabaseUtil.extractUuid(it) }
-                else listOf()
-
                 list.add(
                     Resident(
                         uuid = UUID.fromString(rs.getString("uuid")),
-                        trusted = trusted,
-                        town = town,
-                        roles = roles
+                        trusted = DatabaseUtil.extractNullable<List<UUID>>(rs, "trusted") { DatabaseUtil.extractUuid(it) }
+                            ?: listOf(),
+                        town = DatabaseUtil.extractNullable<UUID>(rs, "town"),
+                        roles = DatabaseUtil.extractNullable<List<UUID>>(rs, "roles") { DatabaseUtil.extractUuid(it) }
+                            ?: listOf()
                     )
                 )
             }
