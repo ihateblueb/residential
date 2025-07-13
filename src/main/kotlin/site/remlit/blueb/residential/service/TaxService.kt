@@ -47,7 +47,16 @@ class TaxService {
                 val resident = ResidentService.get(resident) ?: return 0.0
                 if (resident.town == null) return 0.0
                 val town = TownService.get(resident.town) ?: return 0.0
-                return 0.0
+
+                var tax = 0.0
+
+                if (town.taxPercent) {
+                    tax += (resident.getBalance() / town.tax) * 100
+                } else {
+                    tax += town.tax
+                }
+
+                return tax
             }
         }
     }
