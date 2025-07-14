@@ -6,7 +6,6 @@ import co.aikar.commands.annotation.CommandCompletion
 import co.aikar.commands.annotation.CommandPermission
 import co.aikar.commands.annotation.Subcommand
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Enderman
 import org.bukkit.entity.Player
 import site.remlit.blueb.residential.Clock
 import site.remlit.blueb.residential.Commands
@@ -111,7 +110,7 @@ class DebugCommand : BaseCommand() {
     @Subcommand("newdayevent")
     fun newDayEvent(sender: CommandSender, args: Array<String>) =
         safeCommand(sender) {
-            NewDayEvent()
+            NewDayEvent().callEvent()
         }
 
     init {

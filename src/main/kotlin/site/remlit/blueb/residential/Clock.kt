@@ -41,13 +41,11 @@ class Clock {
 
                     if (clockState == maxClockState) {
                         setClock(0)
-                        NewDayEvent()
+                        NewDayEvent().callEvent()
                         Logger.info("Clock", "New day, resetting clock.")
-
-                        // collect taxes, etc, new day stuff
                     } else {
                         setClock(clockState + 1)
-                        ClockTickEvent(clockState + 1, maxClockState)
+                        ClockTickEvent(clockState + 1, maxClockState).callEvent()
                     }
 
                     getClockState()
