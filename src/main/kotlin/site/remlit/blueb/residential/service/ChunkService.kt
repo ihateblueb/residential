@@ -60,7 +60,7 @@ class ChunkService {
 
             val newChunk = get(location)!!
 
-            ChunkClaimEvent(newChunk)
+            ChunkClaimEvent(newChunk).callEvent()
 
             return newChunk
         }

@@ -121,7 +121,7 @@ class TownService {
 
             Residential.economy.withdrawPlayer(Residential.instance.server.getPlayer(founder), Configuration.config.town.cost.toDouble())
 
-            TownCreationEvent(uuid)
+            TownCreationEvent(uuid).callEvent()
 
             ChunkService.claim(uuid, homeChunk)
             ResidentService.joinTown(founder, uuid)
@@ -157,12 +157,12 @@ class TownService {
 
         fun deposit(town: UUID, amount: Double) {
             handleMoneyAdd(town, amount)
-            TownBankDepositEvent(town, amount)
+            TownBankDepositEvent(town, amount).callEvent()
         }
 
         fun withdraw(town: UUID, amount: Double) {
             handleMoneyAdd(town, amount * -1)
-            TownBankWithdrawEvent(town, amount)
+            TownBankWithdrawEvent(town, amount).callEvent()
         }
 
         fun setName(town: UUID, name: String) {

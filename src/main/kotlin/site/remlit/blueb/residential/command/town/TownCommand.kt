@@ -12,7 +12,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import site.remlit.blueb.residential.Configuration
 import site.remlit.blueb.residential.Residential
-import site.remlit.blueb.residential.command.safeCommand
+import site.remlit.blueb.residential.util.inline.safeCommand
 import site.remlit.blueb.residential.model.GracefulCommandException
 import site.remlit.blueb.residential.service.ChunkService
 import site.remlit.blueb.residential.service.ResidentService

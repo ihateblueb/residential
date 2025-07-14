@@ -9,7 +9,7 @@ import kotlin.io.path.Path
 
 class ExceptionUtil {
     companion object {
-        fun createReport(location: String, e: Exception) {
+        fun createReport(location: String, e: Throwable) {
             thread(name = "Residential Exception Report Creator") {
                 Logger.severe("Exception", "At ${location}: ${e.message}")
 

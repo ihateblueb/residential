@@ -6,7 +6,7 @@ import co.aikar.commands.annotation.CommandPermission
 import co.aikar.commands.annotation.Default
 import co.aikar.commands.annotation.Subcommand
 import org.bukkit.command.CommandSender
-import site.remlit.blueb.residential.command.safeCommand
+import site.remlit.blueb.residential.util.inline.safeCommand
 
 @CommandAlias("town|t")
 @Subcommand("warp")

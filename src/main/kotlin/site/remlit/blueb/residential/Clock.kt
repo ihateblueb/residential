@@ -2,6 +2,7 @@ package site.remlit.blueb.residential
 
 import site.remlit.blueb.residential.event.ClockTickEvent
 import site.remlit.blueb.residential.event.NewDayEvent
+import site.remlit.blueb.residential.util.inline.scheduled
 import java.lang.Thread.sleep
 import kotlin.concurrent.thread
 
@@ -41,11 +42,11 @@ class Clock {
 
                     if (clockState == maxClockState) {
                         setClock(0)
-                        NewDayEvent().callEvent()
+                        scheduled { NewDayEvent().callEvent() }
                         Logger.info("Clock", "New day, resetting clock.")
                     } else {
                         setClock(clockState + 1)
-                        ClockTickEvent(clockState + 1, maxClockState).callEvent()
+                        scheduled { ClockTickEvent(clockState + 1, maxClockState).callEvent() }
                     }
 
                     getClockState()

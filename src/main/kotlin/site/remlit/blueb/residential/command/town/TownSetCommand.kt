@@ -8,7 +8,7 @@ import co.aikar.commands.annotation.Subcommand
 import co.aikar.commands.annotation.Syntax
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import site.remlit.blueb.residential.command.safeCommand
+import site.remlit.blueb.residential.util.inline.safeCommand
 import site.remlit.blueb.residential.model.GracefulCommandException
 import site.remlit.blueb.residential.service.ResidentService
 import site.remlit.blueb.residential.service.TownService

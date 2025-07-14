@@ -20,6 +20,7 @@ import site.remlit.blueb.residential.util.FireworkUtil
 import site.remlit.blueb.residential.util.LocationUtil
 import site.remlit.blueb.residential.util.MessageUtil
 import site.remlit.blueb.residential.util.UuidUtil
+import site.remlit.blueb.residential.util.inline.safeCommand
 import java.util.UUID
 
 @CommandAlias("residential|rd")
@@ -89,7 +90,13 @@ class DebugCommand : BaseCommand() {
             val town = TownService.get(ResidentService.get(player.uniqueId)?.town!!)!!
 
             when (enum) {
-                FireworkType.NEW_DAY -> FireworkUtil.spawnAt(LocationUtil.stringToLocation(town.spawn, ChunkUtil.stringToChunk(town.homeChunk)!!.world.name), enum)
+                FireworkType.NEW_DAY -> FireworkUtil.spawnAt(
+                    LocationUtil.stringToLocation(
+                        town.spawn,
+                        ChunkUtil.stringToChunk(town.homeChunk)!!.world.name
+                    ), enum
+                )
+
                 else -> FireworkUtil.spawnAt(player.location, enum)
             }
         }
