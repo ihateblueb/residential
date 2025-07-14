@@ -1,10 +1,13 @@
 package site.remlit.blueb.residential
 
 import co.aikar.commands.PaperCommandManager
+import net.kyori.adventure.key.Key
+import net.kyori.adventure.translation.TranslationStore
 import site.remlit.blueb.residential.service.TownRoleService
 import net.milkbowl.vault.economy.Economy
 import org.bukkit.plugin.java.JavaPlugin
 import java.lang.Thread.sleep
+import java.util.Locale
 import kotlin.concurrent.thread
 import kotlin.time.measureTime
 
@@ -13,7 +16,7 @@ class Residential : JavaPlugin() {
         instance = this
 
         if (instance.server.pluginManager.getPlugin("Towny") != null) {
-            Logger.severe("Towny conflicts severely with Residential and it cannot run alongside it.")
+            Logger.severe("Towny conflicts severely with Residential and cannot run alongside it.")
             instance.server.pluginManager.disablePlugin(this)
             return
         }

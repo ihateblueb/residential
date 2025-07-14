@@ -40,6 +40,8 @@ dependencies {
     implementation("org.spongepowered:configurate-yaml:4.2.0")
     implementation("org.spongepowered:configurate-extra-kotlin:4.2.0")
 
+    implementation("net.kyori:adventure-api:4.23.0")
+
     // supplied later by PluginLoader
     compileOnly("com.zaxxer:HikariCP:6.3.0")
     compileOnly("org.postgresql:postgresql:42.7.7")

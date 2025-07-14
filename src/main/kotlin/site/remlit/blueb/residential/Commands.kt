@@ -15,6 +15,7 @@ class Commands {
             commandManager.registerCommand(ResidentialCommand())
             commandManager.registerCommand(DebugCommand())
 
+            commandManager.registerCommand(TownBankCommand())
             commandManager.registerCommand(TownCommand())
             commandManager.registerCommand(TownSetCommand())
             commandManager.registerCommand(TownWarpCommand())
