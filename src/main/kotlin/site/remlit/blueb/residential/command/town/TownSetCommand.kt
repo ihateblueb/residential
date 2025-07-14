@@ -17,6 +17,7 @@ import site.remlit.blueb.residential.util.LocationUtil
 import site.remlit.blueb.residential.util.MessageUtil
 
 @CommandAlias("town|t")
+
 @Subcommand("set")
 @CommandPermission("residential.town.set")
 class TownSetCommand : BaseCommand() {

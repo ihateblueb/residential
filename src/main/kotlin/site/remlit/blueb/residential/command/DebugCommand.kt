@@ -5,12 +5,17 @@ import co.aikar.commands.annotation.CommandAlias
 import co.aikar.commands.annotation.CommandPermission
 import co.aikar.commands.annotation.Subcommand
 import org.bukkit.command.CommandSender
+import org.bukkit.entity.EntityType
+import org.bukkit.entity.Firework
 import org.bukkit.entity.Player
 import site.remlit.blueb.residential.Clock
+import site.remlit.blueb.residential.Residential
+import site.remlit.blueb.residential.model.FireworkType
 import site.remlit.blueb.residential.service.ChunkService
 import site.remlit.blueb.residential.service.ResidentService
 import site.remlit.blueb.residential.service.TownService
 import site.remlit.blueb.residential.util.ChunkUtil
+import site.remlit.blueb.residential.util.FireworkUtil
 import site.remlit.blueb.residential.util.MessageUtil
 import site.remlit.blueb.residential.util.UuidUtil
 import java.util.UUID
@@ -66,5 +71,13 @@ class DebugCommand : BaseCommand() {
 
             MessageUtil.send(player, debugHeader("Resident", "${resident?.uuid}"))
             MessageUtil.send(player, "<yellow>${resident}")
+        }
+
+    @Subcommand("newtownfirework")
+    fun newTownFirework(sender: CommandSender, args: Array<String>) =
+        safeCommand(sender) {
+            val player = sender as Player
+
+            FireworkUtil.spawnAt(player, FireworkType.NEW_TOWN)
         }
 }

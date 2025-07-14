@@ -63,104 +63,80 @@ class TownCommand : BaseCommand() {
     @Syntax("<town>")
     @CommandPermission("residential.town.new")
     @Description("Create a new town")
-    fun new(sender: CommandSender, args: Array<String>) {
-        val player = sender as Player
+    fun new(sender: CommandSender, args: Array<String>) =
+        safeCommand(sender) {
+            val player = sender as Player
 
-        val name = args.getOrNull(0)
+            val name = args.getOrNull(0)
 
-        // TODO: min distance between claimed areas
+            // TODO: min distance between claimed areas
 
-        if (name.isNullOrBlank()) {
-            MessageUtil.send(player, "<red>Town name cannot be blank.")
-            return
-        }
+            if (name.isNullOrBlank())
+                throw GracefulCommandException("<red>Town name cannot be blank.")
 
-        if (name.length > Configuration.Companion.config.town.name.maxLength) {
-            MessageUtil.send(player, "<red>Town name cannot be longer than ${Configuration.Companion.config.town.name.maxLength} characters.")
-            return
-        }
+            if (name.length > Configuration.Companion.config.town.name.maxLength)
+                throw GracefulCommandException("<red>Town name cannot be longer than ${Configuration.Companion.config.town.name.maxLength} characters.")
 
-        val balance = Residential.economy.getBalance(player)
+            val balance = Residential.economy.getBalance(player)
+            if (balance < Configuration.config.town.cost)
+                throw GracefulCommandException("<red>You cannot afford creating a town, which costs ${Residential.economy.format(Configuration.config.town.cost.toDouble())}.")
 
-        if (balance < Configuration.config.town.cost) {
-            MessageUtil.send(player, "<red>You cannot afford creating a town, which costs ${Residential.economy.format(Configuration.config.town.cost.toDouble())}.")
-            return
-        }
-
-        val homeChunk = player.chunk
-
-        try {
+            val homeChunk = player.chunk
             TownService.register(name, player.uniqueId, ChunkUtil.chunkToString(homeChunk), player.world.name, LocationUtil.locationToString(player.location))
-        } catch (e: GracefulCommandException) {
-            MessageUtil.Companion.send(player, "<red>${e.message}")
-            return
         }
-
-        return
-    }
 
     @Subcommand("spawn")
     @Syntax("<town>")
     @CommandPermission("residential.town.spawn")
     @Description("Teleport to the spawn of a town")
-    fun spawn(sender: CommandSender, args: Array<String>) {
-        val player = sender as Player
-        val resident = ResidentService.Companion.get(player.uniqueId)
-        val townUuid = UuidUtil.fromStringOrNull(args.getOrNull(0)) ?: resident?.town
+    fun spawn(sender: CommandSender, args: Array<String>) =
+        safeCommand(sender) {
+            val player = sender as Player
+            val resident = ResidentService.Companion.get(player.uniqueId)
+            val townUuid = UuidUtil.fromStringOrNull(args.getOrNull(0)) ?: resident?.town
 
-        if (townUuid == null) {
-            MessageUtil.Companion.send(player, "<red>You aren't in a town, please specify one.")
-            return
+            if (townUuid == null)
+                throw GracefulCommandException("<red>You aren't in a town, please specify one.")
+
+            val town = TownService.Companion.get(townUuid)
+            if (town == null)
+                throw GracefulCommandException("<red>Town doesn't exist")
+
+            TownService.Companion.teleport(townUuid, player.uniqueId)
         }
-
-        val town = TownService.Companion.get(townUuid)
-        if (town == null) {
-            MessageUtil.Companion.send(player, "<red>Town doesn't exist.")
-            return
-        }
-
-        TownService.Companion.teleport(townUuid, player.uniqueId)
-    }
 
     @Subcommand("claim")
     @CommandPermission("residential.town.claim")
     @Description("Claim the current chunk you're standing in for you town")
-    fun claim(sender: CommandSender, args: Array<String>) {
-        val player = sender as Player
-        val resident = ResidentService.get(player.uniqueId)
+    fun claim(sender: CommandSender, args: Array<String>) =
+        safeCommand(sender) {
+            val player = sender as Player
+            val resident = ResidentService.get(player.uniqueId)
 
-        if (resident?.town == null) {
-            MessageUtil.send(player, "<red>You aren't in a town.")
-            return
-        }
+            if (resident?.town == null)
+                throw GracefulCommandException("<red>You aren't in a town.")
 
-        if (resident.getTownRoles().find { it.cmdPlotManagement || it.cmdMayor } == null) {
-            MessageUtil.send(player, "<red>You do not have plot management permissions in this town.")
-            return
-        }
+            if (resident.getTownRoles().find { it.cmdPlotManagement || it.cmdMayor } == null)
+                throw GracefulCommandException("<red>You do not have plot management permissions in this town.")
 
-        val chunk = ChunkUtil.chunkToString(player.chunk)
+            val chunk = ChunkUtil.chunkToString(player.chunk)
 
-        try {
             ChunkService.claim(resident.town, chunk)
-        } catch (e: GracefulCommandException) {
-            MessageUtil.send(player, "<red>${e.message}")
-            return
+            MessageUtil.send(player, "<dark_green>Claimed chunk at $chunk")
         }
-
-        MessageUtil.send(player, "<dark_green>Claimed chunk at $chunk")
-    }
 
     @Subcommand("delete")
     @CommandPermission("residential.town.delete")
     @Description("Delete your town")
-    fun delete(sender: CommandSender, args: Array<String>) { TODO() }
+    fun delete(sender: CommandSender, args: Array<String>) =
+        safeCommand(sender) { TODO() }
 
     @Subcommand("invite")
     @Syntax("[player]")
     @CommandPermission("residential.town.invite")
     @Description("Invite a player to your town")
-    fun invite(sender: CommandSender, args: Array<String>) { TODO() }
+    fun invite(sender: CommandSender, args: Array<String>) =
+        safeCommand(sender) { TODO() }
 
     /*
     * Bank
@@ -170,87 +146,64 @@ class TownCommand : BaseCommand() {
     @Syntax("[amount]")
     @CommandPermission("residential.town.deposit")
     @Description("Deposit money to your town bank")
-    fun deposit(sender: CommandSender, args: Array<String>) {
-        val player = sender as Player
-        val resident = ResidentService.get(player.uniqueId)
+    fun deposit(sender: CommandSender, args: Array<String>) =
+        safeCommand(sender) {
+            val player = sender as Player
+            val resident = ResidentService.get(player.uniqueId)
 
-        if (resident?.town == null) {
-            MessageUtil.send(player, "<red>You aren't in a town.")
-            return
-        }
+            if (resident?.town == null)
+                throw GracefulCommandException("<red>You aren't in a town.")
 
-        if (resident.getTownRoles().find { it.bankDeposit || it.cmdMayor } == null) {
-            MessageUtil.send(player, "<red>You do not have bank deposit permissions in this town.")
-            return
-        }
+            if (resident.getTownRoles().find { it.bankDeposit || it.cmdMayor } == null)
+                throw GracefulCommandException("<red>You do not have bank deposit permissions in this town.")
 
-        val amount = args.getOrNull(0)?.toDoubleOrNull()
+            val amount = args.getOrNull(0)?.toDoubleOrNull()
 
-        if (amount == null) {
-            MessageUtil.send(player, "<red>You must specify an amount.")
-            return
-        }
+            if (amount == null)
+                throw GracefulCommandException("<red>You must specify an amount.")
 
-        if (amount < 0.01) {
-            MessageUtil.send(player, "<red>You must deposit at least ${Residential.economy.format(0.01)}.")
-            return
-        }
+            if (amount < 0.01)
+                throw GracefulCommandException("<red>You must deposit at least ${Residential.economy.format(0.01)}.")
 
-        if (Residential.economy.getBalance(player) < amount) {
-            MessageUtil.send(player, "<red>You don't have enough money.")
-            return
-        }
+            if (Residential.economy.getBalance(player) < amount)
+                throw GracefulCommandException("<red>You don't have enough money.")
 
-        if (Residential.economy.withdrawPlayer(player, amount).type != EconomyResponse.ResponseType.SUCCESS) {
-            MessageUtil.send(player, "<red>Failed to withdraw from your account.")
-            return
-        } else {
+            if (Residential.economy.withdrawPlayer(player, amount).type != EconomyResponse.ResponseType.SUCCESS)
+                throw GracefulCommandException("<red>Failed to withdraw from your account.")
+
             TownService.deposit(resident.town, amount)
         }
-    }
 
     @Subcommand("withdraw")
     @Syntax("[amount]")
     @CommandPermission("residential.town.withdraw")
     @Description("Withdraw money from your town bank")
-    fun withdraw(sender: CommandSender, args: Array<String>) {
-        val player = sender as Player
-        val resident = ResidentService.get(player.uniqueId)
+    fun withdraw(sender: CommandSender, args: Array<String>) =
+        safeCommand(sender) {
+            val player = sender as Player
+            val resident = ResidentService.get(player.uniqueId)
 
-        if (resident?.town == null) {
-            MessageUtil.send(player, "<red>You aren't in a town.")
-            return
-        }
+            if (resident?.town == null)
+                throw GracefulCommandException("<red>You aren't in a town.")
 
-        if (resident.getTownRoles().find { it.bankWithdraw || it.cmdMayor } == null) {
-            MessageUtil.send(player, "<red>You do not have bank withdraw permissions in this town.")
-            return
-        }
+            if (resident.getTownRoles().find { it.bankWithdraw || it.cmdMayor } == null)
+                throw GracefulCommandException("<red>You do not have bank withdraw permissions in this town.")
 
-        val amount = args.getOrNull(0)?.toDoubleOrNull()
+            val amount = args.getOrNull(0)?.toDoubleOrNull()
 
-        if (amount == null) {
-            MessageUtil.send(player, "<red>You must specify an amount.")
-            return
-        }
+            if (amount == null)
+                throw GracefulCommandException("<red>You must specify an amount.")
 
-        if (amount < 0.01) {
-            MessageUtil.send(player, "<red>You must withdraw at least ${Residential.economy.format(0.01)}.")
-            return
-        }
+            if (amount < 0.01)
+                throw GracefulCommandException("<red>You must withdraw at least ${Residential.economy.format(0.01)}.")
 
-        val town = TownService.get(resident.town)!!
+            val town = TownService.get(resident.town)!!
+            if (town.balance < amount)
+                throw GracefulCommandException("<red>Your town doesn't have enough money.")
 
-        if (town.balance < amount) {
-            MessageUtil.send(player, "<red>Your town doesn't have enough money.")
-            return
-        }
+            if (Residential.economy.depositPlayer(player, amount).type != EconomyResponse.ResponseType.SUCCESS)
+                throw GracefulCommandException("<red>Failed to deposit to your account.")
 
-        if (Residential.economy.depositPlayer(player, amount).type != EconomyResponse.ResponseType.SUCCESS) {
-            MessageUtil.send(player, "<red>Failed to deposit to your account.")
-            return
-        } else {
             TownService.withdraw(resident.town, amount)
         }
-    }
 }
