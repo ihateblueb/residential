@@ -22,14 +22,20 @@ repositories {
     maven("https://repo.aikar.co/content/groups/aikar/") {
         name = "aikar-repo"
     }
+    maven("https://repo.extendedclip.com/content/repositories/placeholderapi/") {
+        name = "extendedclip-repo"
+    }
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.20-R0.1-SNAPSHOT")
+    // supplied later by plugin
     compileOnly("com.github.MilkBowl:VaultAPI:1.7")
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation(kotlin("reflect"))
+
+    implementation("me.clip:placeholderapi:2.11.6")
 
     implementation("org.spongepowered:configurate-yaml:4.2.0")
     implementation("org.spongepowered:configurate-extra-kotlin:4.2.0")

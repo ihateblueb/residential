@@ -41,8 +41,13 @@ class TownService {
             }
         }
 
-        // take, offset, sort by foundedAt
-        fun getAll(): Nothing = TODO()
+        fun getAll(): List<Town> {
+            Database.connection.prepareStatement("SELECT * FROM town WHERE abandoned = false").use { stmt ->
+                stmt.executeQuery().use { rs ->
+                    return Town.manyFromRs(rs)
+                }
+            }
+        }
 
         fun getAllUuids(): List<UUID> {
                 Database.connection.prepareStatement("SELECT * FROM town WHERE abandoned = false").use { stmt ->

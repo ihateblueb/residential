@@ -14,8 +14,6 @@ class PlayerJoinListener : Listener {
 
         if (resident == null) {
             ResidentService.register(player.uniqueId)
-        } else {
-            ResidentService
         }
     }
 }

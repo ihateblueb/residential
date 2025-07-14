@@ -2,20 +2,23 @@ package site.remlit.blueb.residential.command
 
 import co.aikar.commands.BaseCommand
 import co.aikar.commands.annotation.CommandAlias
+import co.aikar.commands.annotation.CommandCompletion
 import co.aikar.commands.annotation.CommandPermission
 import co.aikar.commands.annotation.Subcommand
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.EntityType
-import org.bukkit.entity.Firework
+import org.bukkit.entity.Enderman
 import org.bukkit.entity.Player
 import site.remlit.blueb.residential.Clock
-import site.remlit.blueb.residential.Residential
+import site.remlit.blueb.residential.Commands
+import site.remlit.blueb.residential.event.NewDayEvent
 import site.remlit.blueb.residential.model.FireworkType
+import site.remlit.blueb.residential.model.GracefulCommandException
 import site.remlit.blueb.residential.service.ChunkService
 import site.remlit.blueb.residential.service.ResidentService
 import site.remlit.blueb.residential.service.TownService
 import site.remlit.blueb.residential.util.ChunkUtil
 import site.remlit.blueb.residential.util.FireworkUtil
+import site.remlit.blueb.residential.util.LocationUtil
 import site.remlit.blueb.residential.util.MessageUtil
 import site.remlit.blueb.residential.util.UuidUtil
 import java.util.UUID
@@ -73,11 +76,47 @@ class DebugCommand : BaseCommand() {
             MessageUtil.send(player, "<yellow>${resident}")
         }
 
-    @Subcommand("newtownfirework")
-    fun newTownFirework(sender: CommandSender, args: Array<String>) =
+    @Subcommand("firework")
+    @CommandCompletion("@firework_type")
+    fun firework(sender: CommandSender, args: Array<String>) =
         safeCommand(sender) {
             val player = sender as Player
 
-            FireworkUtil.spawnAt(player, FireworkType.NEW_TOWN)
+            val arg = args.getOrNull(0)
+            if (arg == null)
+                throw GracefulCommandException("<red>You must provide a firework type.")
+
+            val enum = FireworkType.valueOf(arg)
+            val town = TownService.get(ResidentService.get(player.uniqueId)?.town!!)!!
+
+            when (enum) {
+                FireworkType.NEW_DAY -> FireworkUtil.spawnAt(LocationUtil.stringToLocation(town.spawn, ChunkUtil.stringToChunk(town.homeChunk)!!.world.name), enum)
+                else -> FireworkUtil.spawnAt(player.location, enum)
+            }
         }
+
+    @Subcommand("exception")
+    fun exception(sender: CommandSender, args: Array<String>) =
+        safeCommand(sender) {
+            throw Exception("This is a test exception for debugging!")
+        }
+
+    @Subcommand("newday")
+    fun newDay(sender: CommandSender, args: Array<String>) =
+        safeCommand(sender) {
+            Clock.clockState = Clock.maxClockState
+            MessageUtil.send(sender, "<yellow>At next clock tick, a new day will occur.")
+        }
+
+    @Subcommand("newdayevent")
+    fun newDayEvent(sender: CommandSender, args: Array<String>) =
+        safeCommand(sender) {
+            NewDayEvent()
+        }
+
+    init {
+        Commands.commandManager.commandCompletions.registerCompletion("firework_type") {
+            FireworkType.toStringList()
+        }
+    }
 }

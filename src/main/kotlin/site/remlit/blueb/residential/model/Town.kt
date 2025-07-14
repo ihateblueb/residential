@@ -65,5 +65,38 @@ data class Town(
             }
             return null
         }
+
+        fun manyFromRs(rs: ResultSet): List<Town> {
+            val list = mutableListOf<Town>()
+            while (rs.next()) {
+                list.add(
+                    Town(
+                        uuid = UUID.fromString(rs.getString("uuid")),
+                        name = rs.getString("name"),
+                        tag = DatabaseUtil.extractNullable<String>(rs, "tag"),
+                        founder = UUID.fromString(rs.getString("founder")),
+                        foundedAt = DatabaseUtil.extractLocalDateTime(rs.getString("foundedAt"))!!,
+                        abandoned = rs.getBoolean("abandoned"),
+                        nation = DatabaseUtil.extractNullable<UUID>(rs, "nation"),
+                        homeChunk = rs.getString("homeChunk"),
+                        spawn = rs.getString("spawn"),
+
+                        open = rs.getBoolean("open"),
+                        pvp = rs.getBoolean("pvp"),
+                        mobs = rs.getBoolean("mobs"),
+                        fire = rs.getBoolean("fire"),
+
+                        balance = rs.getDouble("balance"),
+
+                        tax = DatabaseUtil.extractNullable<Double>(rs, "tax") ?: Configuration.config.town.tax.resident.cost,
+                        taxPercent = DatabaseUtil.extractNullable<Boolean>(rs, "taxPercent") ?: Configuration.config.town.tax.resident.percent,
+                        taxDebt = DatabaseUtil.extractNullable<Boolean>(rs, "taxDebt") ?: Configuration.config.town.tax.resident.debt,
+                        taxFeeMultiplier = DatabaseUtil.extractNullable<Double>(rs, "taxFeeMultiplier") ?: Configuration.config.town.tax.resident.feeMultiplier,
+                        taxMaxLate = DatabaseUtil.extractNullable<Int>(rs, "taxMaxLate") ?: Configuration.config.town.tax.resident.maxLate,
+                    )
+                )
+            }
+            return list
+        }
     }
 }

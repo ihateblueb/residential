@@ -39,8 +39,6 @@ class Clock {
                 while (!Thread.interrupted()) {
                     sleep((clockInterval.toLong() * 60) * 1000)
 
-                    getClockState()
-
                     if (clockState == maxClockState) {
                         setClock(0)
                         NewDayEvent()

@@ -13,7 +13,7 @@ class PlayerMoveListener : Listener {
     @EventHandler
     fun onPlayerMove(event: PlayerMoveEvent) {
         if (event.from.chunk == event.to.chunk) return
-        if (!Configuration.config.worlds!!.contains(event.to.world.name)) return
+        if (!Configuration.config.worlds.contains(event.to.world.name)) return
 
         val fromChunk = ChunkService.get(ChunkUtil.chunkToString(event.from.chunk))
         val toChunk = ChunkService.get(ChunkUtil.chunkToString(event.to.chunk))

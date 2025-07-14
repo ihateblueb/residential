@@ -27,7 +27,7 @@ class ResidentialPluginLoader : PluginLoader {
         )
         resolver.addRepository(
             RemoteRepository.Builder(
-                "aikar",
+                "aikar-repo",
                 "default",
                 "https://repo.aikar.co/content/groups/aikar/"
             ).build()
