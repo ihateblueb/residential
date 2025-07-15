@@ -238,6 +238,10 @@ class Database {
                 if (version <= 8) {
                     stmt.execute("ALTER TABLE chunk DROP COLUMN world")
                     stmt.execute("ALTER TABLE chunk DROP COLUMN location")
+                    /*
+                    * TODO: sqlite fails:
+                    *  [SQLITE_ERROR] SQL error or missing database (cannot drop PRIMARY KEY column: "location")
+                    * */
 
                     stmt.execute("ALTER TABLE chunk ADD COLUMN location varchar(256)")
 

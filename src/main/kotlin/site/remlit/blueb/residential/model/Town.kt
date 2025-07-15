@@ -3,7 +3,6 @@ package site.remlit.blueb.residential.model
 import site.remlit.blueb.residential.Configuration
 import site.remlit.blueb.residential.service.TownService
 import site.remlit.blueb.residential.util.DatabaseUtil
-import site.remlit.blueb.residential.util.UuidUtil
 import java.sql.ResultSet
 import java.time.LocalDateTime
 import java.util.UUID

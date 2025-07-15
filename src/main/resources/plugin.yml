@@ -4,6 +4,7 @@ main: site.remlit.blueb.residential.Residential
 paper-plugin-loader: site.remlit.blueb.residential.ResidentialPluginLoader
 api-version: '1.20'
 authors: [ blueb ]
-
 depend:
   - Vault
+softdepend:
+  - PlaceholderAPI

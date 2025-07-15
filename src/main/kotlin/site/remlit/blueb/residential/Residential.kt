@@ -1,13 +1,10 @@
 package site.remlit.blueb.residential
 
 import co.aikar.commands.PaperCommandManager
-import net.kyori.adventure.key.Key
-import net.kyori.adventure.translation.TranslationStore
 import site.remlit.blueb.residential.service.TownRoleService
 import net.milkbowl.vault.economy.Economy
 import org.bukkit.plugin.java.JavaPlugin
 import java.lang.Thread.sleep
-import java.util.Locale
 import kotlin.concurrent.thread
 import kotlin.time.measureTime
 
@@ -21,22 +18,6 @@ class Residential : JavaPlugin() {
             return
         }
 
-        val vaultTimeTaken = measureTime {
-            if (instance.server.pluginManager.getPlugin("Vault") == null) {
-                Logger.severe("Vault is required to use Residential.")
-                instance.server.pluginManager.disablePlugin(this)
-                return
-            }
-            val rsp = instance.server.servicesManager.getRegistration(Economy::class.java)
-            if (rsp == null) {
-                Logger.severe("An economy provider is required to use Residential.")
-                instance.server.pluginManager.disablePlugin(this)
-                return
-            }
-            economy = rsp.provider
-        }
-        Logger.info("Vault setup in ${vaultTimeTaken.inWholeMilliseconds} ms")
-
         val configTimeTaken = measureTime { Configuration.load() }
         Logger.info("Loaded configuration in ${configTimeTaken.inWholeMilliseconds} ms")
 
@@ -45,6 +26,24 @@ class Residential : JavaPlugin() {
             Database.setup()
         }
         Logger.info("Connected to and setup database in ${dbTimeTaken.inWholeMilliseconds} ms")
+
+        if (instance.server.pluginManager.getPlugin("Vault") == null) {
+            Logger.severe("Vault is required to use Residential.")
+            instance.server.pluginManager.disablePlugin(this)
+            return
+        }
+        val rsp = instance.server.servicesManager.getRegistration(Economy::class.java)
+        if (rsp == null) {
+            Logger.severe("An economy provider is required to use Residential.")
+            instance.server.pluginManager.disablePlugin(this)
+            return
+        }
+        economy = rsp.provider
+
+        if (instance.server.pluginManager.getPlugin("PlaceholderAPI") != null) {
+            Logger.info("Found PlaceholderAPI, registering expansion")
+            Expansion().register()
+        }
 
         Commands.register()
         EventListener.register()
