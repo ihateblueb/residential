@@ -74,11 +74,7 @@ class Database {
             val dbType = Configuration.config.database
             val isMySQL = (dbType == "mysql")
 
-            /*
-            * mysql sucks ass and doesn't support uuid, technically sqlite doesn't either, but it doesn't mind it being set as the type.
-            * postgres runs better with it, so when dbType isn't mysql, this will set the column type to uuid instead of a varchar
-            * */
-            fun uuidOrVarchar() = if (isMySQL) "varchar(36)" else "uuid"
+            fun uuidOrVarchar() = "varchar(36)"
 
             connection.createStatement().use { stmt ->
                 stmt.execute("CREATE TABLE IF NOT EXISTS database_meta(id varchar(1) primary key default 'r', version int default 0)")
