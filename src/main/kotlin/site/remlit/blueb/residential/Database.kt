@@ -72,7 +72,9 @@ class Database {
 
         fun setup() {
             val dbType = Configuration.config.database
+
             val isMySQL = (dbType == "mysql")
+            val isNotSqlite = (dbType != "isNotSqlite")
 
             fun uuidOrVarchar() = "varchar(36)"
 
@@ -84,7 +86,7 @@ class Database {
                         stmt.execute("INSERT INTO database_meta (id, version) VALUES ('r', 0)")
                         0
                     } else {
-                        if (isMySQL) rs.next()
+                        if (isNotSqlite) rs.next()
                         rs.getInt("version")
                     }
                 }

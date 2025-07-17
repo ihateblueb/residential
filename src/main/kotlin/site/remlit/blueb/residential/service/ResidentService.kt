@@ -29,6 +29,16 @@ class ResidentService {
             }
         }
 
+        fun getAll(): List<Resident> {
+            val connection = Database.connection
+
+            connection.prepareStatement("SELECT * FROM resident").use { stmt ->
+                stmt.executeQuery().use { rs ->
+                    return Resident.manyFromRs(rs)
+                }
+            }
+        }
+
         fun register(uuid: UUID): Resident {
             val connection = Database.connection
 

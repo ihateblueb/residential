@@ -4,6 +4,7 @@ import co.aikar.commands.PaperCommandManager
 import site.remlit.blueb.residential.service.TownRoleService
 import net.milkbowl.vault.economy.Economy
 import org.bukkit.plugin.java.JavaPlugin
+import site.remlit.blueb.residential.util.ExceptionUtil
 import java.lang.Thread.sleep
 import kotlin.concurrent.thread
 import kotlin.time.measureTime
@@ -18,14 +19,22 @@ class Residential : JavaPlugin() {
             return
         }
 
-        val configTimeTaken = measureTime { Configuration.load() }
-        Logger.info("Loaded configuration in ${configTimeTaken.inWholeMilliseconds} ms")
-
-        val dbTimeTaken = measureTime {
-            Database.connect()
-            Database.setup()
+        try {
+            val configTimeTaken = measureTime { Configuration.load() }
+            Logger.info("Loaded configuration in ${configTimeTaken.inWholeMilliseconds} ms")
+        } catch (e: Throwable) {
+            ExceptionUtil.createReport("start:config", e)
         }
-        Logger.info("Connected to and setup database in ${dbTimeTaken.inWholeMilliseconds} ms")
+
+        try {
+            val dbTimeTaken = measureTime {
+                Database.connect()
+                Database.setup()
+            }
+            Logger.info("Connected to and setup database in ${dbTimeTaken.inWholeMilliseconds} ms")
+        } catch (e: Throwable) {
+            ExceptionUtil.createReport("start:db", e)
+        }
 
         if (instance.server.pluginManager.getPlugin("Vault") == null) {
             Logger.severe("Vault is required to use Residential.")
@@ -40,31 +49,39 @@ class Residential : JavaPlugin() {
         }
         economy = rsp.provider
 
-        if (instance.server.pluginManager.getPlugin("PlaceholderAPI") != null) {
-            Logger.info("Found PlaceholderAPI, registering expansion")
-            Expansion().register()
+        try {
+            if (instance.server.pluginManager.getPlugin("PlaceholderAPI") != null) {
+                Logger.info("Found PlaceholderAPI, registering expansion")
+                Expansion().register()
+            }
+        } catch (e: Throwable) {
+            ExceptionUtil.createReport("start:placeholderapi", e)
         }
 
-        Commands.register()
-        EventListener.register()
-        Clock.start()
+        try {
+            Commands.register()
+            EventListener.register()
+            Clock.start()
 
-        thread(name = "Residential Sync Thread") {
-            val interval = 30L // minutes
-            Logger.info("Sync", "Sync thread interval set at $interval minutes")
+            thread(name = "Residential Sync Thread") {
+                val interval = 30L // minutes
+                Logger.info("Sync", "Sync thread interval set at $interval minutes")
 
-            fun runSync() {
-                val syncTimeTaken = measureTime {
-                    Logger.info("Sync", "Syncing town roles...")
-                    TownRoleService.syncRoles()
+                fun runSync() {
+                    val syncTimeTaken = measureTime {
+                        Logger.info("Sync", "Syncing town roles...")
+                        TownRoleService.syncRoles()
+                    }
+                    Logger.info("Sync", "Town role sync completed in ${syncTimeTaken.inWholeMilliseconds}ms.")
                 }
-                Logger.info("Sync", "Town role sync completed in ${syncTimeTaken.inWholeMilliseconds}ms.")
-            }
 
-            while (!Thread.interrupted()) {
-                runSync()
-                sleep((interval * 60) * 1000)
+                while (!Thread.interrupted()) {
+                    runSync()
+                    sleep((interval * 60) * 1000)
+                }
             }
+        } catch (e: Throwable) {
+            ExceptionUtil.createReport("start:end", e)
         }
     }
 

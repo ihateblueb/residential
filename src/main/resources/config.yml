@@ -114,7 +114,7 @@ town:
       # In Residential days
       interval: 1
       cost: 5
-      # Instead of immediately kicking a resident from a town
+      # Instead of immediately kicking a resident from a town,
       # allow the resident to go in debt and collect late fees.
       debt: true
       # Multiplier used for calculating late fees
