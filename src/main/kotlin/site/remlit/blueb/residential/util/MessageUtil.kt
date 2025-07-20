@@ -2,10 +2,10 @@ package site.remlit.blueb.residential.util
 
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import java.time.LocalDateTime
 import java.time.format.TextStyle
 import java.util.Locale
+import kotlin.math.ceil
 
 class MessageUtil {
     companion object {
@@ -19,7 +19,7 @@ class MessageUtil {
             }
         }
 
-        const val LINE_LENGTH = "--------------------------------------------------------------".length
+        const val LINE_LENGTH = "------------------------------------------------------".length
 
         fun createLine(
             center: String = "",
@@ -29,7 +29,8 @@ class MessageUtil {
             outerPadding: Int = 1,
             innerPadding: Int = 2
         ): String {
-            val halfLineLength = (LINE_LENGTH / 2) - (center.length / 2) - (endCap.length * 2) - innerPadding - outerPadding
+            // rounded because you cant have half a character, rather too short than overflow
+            val halfLineLength = (LINE_LENGTH / 2) - ceil((center.length / 2).toDouble()).toInt() - (endCap.length * 2) - innerPadding - outerPadding
 
             var string = ""
 

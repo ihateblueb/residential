@@ -2,6 +2,7 @@ package site.remlit.blueb.residential.command.town
 
 import co.aikar.commands.BaseCommand
 import co.aikar.commands.annotation.CommandAlias
+import co.aikar.commands.annotation.CommandCompletion
 import co.aikar.commands.annotation.CommandPermission
 import co.aikar.commands.annotation.Default
 import co.aikar.commands.annotation.Description
@@ -10,8 +11,10 @@ import co.aikar.commands.annotation.Syntax
 import net.milkbowl.vault.economy.EconomyResponse
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import site.remlit.blueb.residential.Commands
 import site.remlit.blueb.residential.Configuration
 import site.remlit.blueb.residential.Residential
+import site.remlit.blueb.residential.model.FireworkType
 import site.remlit.blueb.residential.util.inline.safeCommand
 import site.remlit.blueb.residential.model.GracefulCommandException
 import site.remlit.blueb.residential.service.ChunkService
@@ -20,7 +23,6 @@ import site.remlit.blueb.residential.service.TownService
 import site.remlit.blueb.residential.util.ChunkUtil
 import site.remlit.blueb.residential.util.LocationUtil
 import site.remlit.blueb.residential.util.MessageUtil
-import site.remlit.blueb.residential.util.UuidUtil
 
 @CommandAlias("town|t")
 @CommandPermission("residential.town")
@@ -30,20 +32,17 @@ class TownCommand : BaseCommand() {
 
     @Default
     @Syntax("<town>")
+    @CommandCompletion("@towns")
     @Description("Get information about a town")
     fun default(sender: CommandSender, args: Array<String>) =
         safeCommand(sender) {
             val player = sender as Player
 
-            val resident = ResidentService.Companion.get(player.uniqueId)
-            val townUuid = UuidUtil.fromStringOrNull(args.getOrNull(0)) ?: resident?.town
+            val resident = ResidentService.get(player.uniqueId)
+            val town = if (args.getOrNull(0) != null) TownService.getByName(args[0]) else resident?.getTown()
 
-            if (townUuid == null)
-                throw GracefulCommandException("<red>You aren't in a town, please specify one.")
-
-            val town = TownService.Companion.get(townUuid)
             if (town == null)
-                throw GracefulCommandException("<red>Town doesn't exist.")
+                throw GracefulCommandException("<red>You aren't in a town, please specify one.")
 
             val founder = Residential.instance.server.getPlayer(town.founder)
             val mayor = town.getMayor()?.getPlayer()
@@ -88,26 +87,24 @@ class TownCommand : BaseCommand() {
 
     @Subcommand("spawn")
     @Syntax("<town>")
+    @CommandCompletion("@towns")
     @CommandPermission("residential.town.spawn")
     @Description("Teleport to the spawn of a town")
     fun spawn(sender: CommandSender, args: Array<String>) =
         safeCommand(sender) {
             val player = sender as Player
             val resident = ResidentService.Companion.get(player.uniqueId)
-            val townUuid = UuidUtil.fromStringOrNull(args.getOrNull(0)) ?: resident?.town
+            val town = if (args.getOrNull(0) != null) TownService.getByName(args[0]) else resident?.getTown()
 
-            if (townUuid == null)
+            if (town == null)
                 throw GracefulCommandException("<red>You aren't in a town, please specify one.")
 
-            val town = TownService.Companion.get(townUuid)
-            if (town == null)
-                throw GracefulCommandException("<red>Town doesn't exist")
-
-            TownService.Companion.teleport(townUuid, player.uniqueId)
+            TownService.Companion.teleport(town.uuid, player.uniqueId)
         }
 
     @Subcommand("join")
     @Syntax("<town>")
+    @CommandCompletion("@towns")
     @CommandPermission("residential.town.join")
     @Description("Join a town")
     fun join(sender: CommandSender, args: Array<String>) =
@@ -118,11 +115,11 @@ class TownCommand : BaseCommand() {
             if (resident.town != null)
                 throw GracefulCommandException("<red>You're already in a town.")
 
-            val townUuid = UuidUtil.fromStringOrNull(args.getOrNull(0))
-            if (townUuid == null)
+            val townName = args.getOrNull(0)
+            if (townName == null)
                 throw GracefulCommandException("<red>You must specify a town.")
 
-            val town = TownService.Companion.get(townUuid)
+            val town = TownService.getByName(townName)
             if (town == null)
                 throw GracefulCommandException("<red>Town doesn't exist.")
 
@@ -154,22 +151,19 @@ class TownCommand : BaseCommand() {
 
     @Subcommand("residents")
     @Syntax("<town>")
+    @CommandCompletion("@towns")
     @CommandPermission("residential.town.residents")
     @Description("List all residents of a town")
     fun residents(sender: CommandSender, args: Array<String>) =
         safeCommand(sender) {
             val player = sender as Player
             val resident = ResidentService.Companion.get(player.uniqueId)
-            val townUuid = UuidUtil.fromStringOrNull(args.getOrNull(0)) ?: resident?.town
+            val town = if (args.getOrNull(0) != null) TownService.getByName(args[0]) else resident?.getTown()
 
-            if (townUuid == null)
+            if (town == null)
                 throw GracefulCommandException("<red>You aren't in a town, please specify one.")
 
-            val town = TownService.Companion.get(townUuid)
-            if (town == null)
-                throw GracefulCommandException("<red>Town doesn't exist")
-
-            val residents = TownService.getResidents(townUuid)
+            val residents = TownService.getResidents(town.uuid)
 
             MessageUtil.send(sender, MessageUtil.createLine(center = "${town.name} Residents (${residents.size})"))
 
@@ -207,4 +201,10 @@ class TownCommand : BaseCommand() {
     @Description("Invite a player to your town")
     fun invite(sender: CommandSender, args: Array<String>) =
         safeCommand(sender) { TODO() }
+
+    init {
+        Commands.commandManager.commandCompletions.registerCompletion("towns") {
+            TownService.getAllNames()
+        }
+    }
 }

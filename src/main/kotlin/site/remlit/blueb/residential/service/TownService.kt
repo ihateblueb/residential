@@ -61,6 +61,18 @@ class TownService {
             }
         }
 
+        fun getAllNames(): List<String> {
+            Database.connection.prepareStatement("SELECT * FROM town WHERE abandoned = false").use { stmt ->
+                val list = mutableListOf<String>()
+                stmt.executeQuery().use { rs ->
+                    while (rs.next()) {
+                        list.add(rs.getString("name"))
+                    }
+                }
+                return list.toList()
+            }
+        }
+
         fun getMayor(town: UUID): Resident? {
             val role = TownRoleService.getByTypeMayor(town)!!
             return ResidentService.getByRole(role.uuid)
@@ -80,7 +92,7 @@ class TownService {
                 stmt.setString(1, town.toString())
                 stmt.executeQuery().use { rs ->
                     while (rs.next())
-                        return rs.getInt(0)
+                        return rs.getInt(1)
                 }
             }
             return 0

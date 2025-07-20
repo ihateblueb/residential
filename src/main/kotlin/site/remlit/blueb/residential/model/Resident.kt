@@ -3,6 +3,7 @@ package site.remlit.blueb.residential.model
 import org.bukkit.entity.Player
 import site.remlit.blueb.residential.Residential
 import site.remlit.blueb.residential.service.TownRoleService
+import site.remlit.blueb.residential.service.TownService
 import site.remlit.blueb.residential.util.DatabaseUtil
 import java.sql.ResultSet
 import java.util.UUID
@@ -14,6 +15,7 @@ data class Resident(
     val roles: List<UUID?>,
 ) {
     fun getPlayer(): Player = Residential.instance.server.getPlayer(uuid) ?: throw Exception("Resident couldn't be found")
+    fun getTown(): Town? = if (town != null) TownService.get(town) else null
     fun getBalance(): Double = Residential.economy.getBalance(getPlayer())
     fun getTownRoles(): List<TownRole> {
         val townRoles = mutableListOf<TownRole>()

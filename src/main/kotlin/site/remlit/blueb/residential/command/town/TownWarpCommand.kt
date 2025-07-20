@@ -12,7 +12,6 @@ import site.remlit.blueb.residential.util.inline.safeCommand
 @Subcommand("warp")
 @CommandPermission("residential.town.warp")
 class TownWarpCommand : BaseCommand() {
-    // todo: ensure resident has perm, town has public warps, warp is public
     @Default
     @CommandPermission("residential.town.warp")
     fun warp(sender: CommandSender, args: Array<String>) =

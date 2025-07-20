@@ -8,9 +8,9 @@ import site.remlit.blueb.residential.util.MessageUtil
 inline fun safeCommand(sender: CommandSender, block: () -> Unit) =
     try { block() } catch(e: Throwable) {
         if (e is GracefulCommandException)
-            MessageUtil.send(sender, e.message ?: "Something went wrong with this command.")
+            MessageUtil.send(sender, if (e.message != null) "<red>${e.message}" else "<red>Something went wrong with this command.")
         else {
-            MessageUtil.send(sender, "Something unexpected went wrong with this command.")
+            MessageUtil.send(sender, "<red>Something unexpected went wrong with this command.")
             ExceptionUtil.createReport("safeCommand", e)
         }
     }
