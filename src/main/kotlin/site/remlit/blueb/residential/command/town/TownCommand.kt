@@ -55,6 +55,7 @@ class TownCommand : BaseCommand() {
             MessageUtil.send(player, "Mayor: ${mayor?.name}")
             MessageUtil.send(player, "Balance: ${Residential.economy.format(town.balance)}")
             MessageUtil.send(player, "Claimed ${allClaimedChunks.size}/${town.getMaxChunks()}")
+            MessageUtil.send(player, "Residents: ${town.getResidentCount()}")
             MessageUtil.send(player, "Open: ${if (town.open) "T" else "F"} PVP: ${if (town.pvp) "T" else "F"} Mobs: ${if (town.mobs) "T" else "F"} Fire: ${if (town.fire) "T" else "F"}")
             MessageUtil.send(player, MessageUtil.createLine())
         }
@@ -105,6 +106,32 @@ class TownCommand : BaseCommand() {
             TownService.Companion.teleport(townUuid, player.uniqueId)
         }
 
+    @Subcommand("join")
+    @Syntax("<town>")
+    @CommandPermission("residential.town.join")
+    @Description("Join a town")
+    fun join(sender: CommandSender, args: Array<String>) =
+        safeCommand(sender) {
+            val player = sender as Player
+            val resident = ResidentService.get(player.uniqueId)!!
+
+            if (resident.town != null)
+                throw GracefulCommandException("<red>You're already in a town.")
+
+            val townUuid = UuidUtil.fromStringOrNull(args.getOrNull(0))
+            if (townUuid == null)
+                throw GracefulCommandException("<red>You must specify a town.")
+
+            val town = TownService.Companion.get(townUuid)
+            if (town == null)
+                throw GracefulCommandException("<red>Town doesn't exist.")
+
+            if (!town.open)
+                throw GracefulCommandException("<red>${town.name} isn't open to join. Ask for an invite.")
+
+            ResidentService.joinTown(resident.uuid, town.uuid)
+        }
+
     @Subcommand("claim")
     @CommandPermission("residential.town.claim")
     @Description("Claim the current chunk you're standing in for you town")
@@ -123,6 +150,49 @@ class TownCommand : BaseCommand() {
 
             ChunkService.claim(resident.town, chunk)
             MessageUtil.send(player, "<dark_green>Claimed chunk at $chunk")
+        }
+
+    @Subcommand("residents")
+    @Syntax("<town>")
+    @CommandPermission("residential.town.residents")
+    @Description("List all residents of a town")
+    fun residents(sender: CommandSender, args: Array<String>) =
+        safeCommand(sender) {
+            val player = sender as Player
+            val resident = ResidentService.Companion.get(player.uniqueId)
+            val townUuid = UuidUtil.fromStringOrNull(args.getOrNull(0)) ?: resident?.town
+
+            if (townUuid == null)
+                throw GracefulCommandException("<red>You aren't in a town, please specify one.")
+
+            val town = TownService.Companion.get(townUuid)
+            if (town == null)
+                throw GracefulCommandException("<red>Town doesn't exist")
+
+            val residents = TownService.getResidents(townUuid)
+
+            MessageUtil.send(sender, MessageUtil.createLine(center = "${town.name} Residents (${residents.size})"))
+
+            var skipFor = 0
+            for (resident in residents) {
+                if (skipFor == 0) {
+                    val index = residents.indexOf(resident)
+
+                    var message = resident.getPlayer().name
+                    if (residents.getOrNull(index + 1) != null) {
+                        message += ", ${residents[index + 1].getPlayer().name}"
+                        skipFor++
+                    }
+                    if (residents.getOrNull(index + 2) != null) {
+                        message += ", ${residents[index + 2].getPlayer().name}"
+                        skipFor++
+                    }
+
+                    MessageUtil.send(player, message)
+                } else {
+                    skipFor--
+                }
+            }
         }
 
     @Subcommand("delete")

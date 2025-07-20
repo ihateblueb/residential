@@ -32,6 +32,8 @@ data class Town(
     val taxMaxLate: Int,
 ) {
     fun getMayor() = TownService.getMayor(uuid)
+    fun getResidents() = TownService.getResidents(uuid)
+    fun getResidentCount() = TownService.getResidentCount(uuid)
     fun getMaxChunks() = Configuration.config.town.claimableChunks.initial
 
     companion object {

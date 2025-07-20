@@ -16,6 +16,7 @@ class EventListener {
             Residential.instance.server.pluginManager.registerEvents(TownCreationListener(), Residential.instance)
             Residential.instance.server.pluginManager.registerEvents(TownBankDepositListener(), Residential.instance)
             Residential.instance.server.pluginManager.registerEvents(TownBankWithdrawListener(), Residential.instance)
+            Residential.instance.server.pluginManager.registerEvents(TownJoinListener(), Residential.instance)
         }
     }
 }

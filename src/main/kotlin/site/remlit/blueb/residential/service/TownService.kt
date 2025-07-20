@@ -75,6 +75,17 @@ class TownService {
             }
         }
 
+        fun getResidentCount(town: UUID): Int {
+            Database.connection.prepareStatement("SELECT COUNT(*) FROM resident WHERE town = ?").use { stmt ->
+                stmt.setString(1, town.toString())
+                stmt.executeQuery().use { rs ->
+                    while (rs.next())
+                        return rs.getInt(0)
+                }
+            }
+            return 0
+        }
+
         fun broadcastToResidents(town: UUID, message: String) {
             val town = get(town)!!
             val residents = getResidents(town.uuid)
@@ -178,8 +189,8 @@ class TownService {
             }
         }
 
-        fun setOpen(town: UUID, toggle: Boolean? = null): Boolean {
-            val changeTo = toggle ?: get(town)!!.open
+        fun setOpen(town: UUID, to: Boolean? = null): Boolean {
+            val changeTo = to ?: !(get(town)!!.open)
 
             Database.connection.prepareStatement("UPDATE town SET open = ? WHERE uuid = ?").use { stmt ->
                 stmt.setBoolean(1, changeTo)

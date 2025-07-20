@@ -13,6 +13,7 @@ class Commands {
             Residential.commandManager = commandManager
 
             commandManager.registerCommand(ResidentialCommand())
+            commandManager.registerCommand(AdminCommand())
             commandManager.registerCommand(DebugCommand())
 
             commandManager.registerCommand(TownBankCommand())

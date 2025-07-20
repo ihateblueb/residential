@@ -24,6 +24,8 @@ class Residential : JavaPlugin() {
             Logger.info("Loaded configuration in ${configTimeTaken.inWholeMilliseconds} ms")
         } catch (e: Throwable) {
             ExceptionUtil.createReport("start:config", e)
+            instance.server.pluginManager.disablePlugin(this)
+            return
         }
 
         try {
@@ -34,6 +36,8 @@ class Residential : JavaPlugin() {
             Logger.info("Connected to and setup database in ${dbTimeTaken.inWholeMilliseconds} ms")
         } catch (e: Throwable) {
             ExceptionUtil.createReport("start:db", e)
+            instance.server.pluginManager.disablePlugin(this)
+            return
         }
 
         if (instance.server.pluginManager.getPlugin("Vault") == null) {
@@ -56,6 +60,8 @@ class Residential : JavaPlugin() {
             }
         } catch (e: Throwable) {
             ExceptionUtil.createReport("start:placeholderapi", e)
+            instance.server.pluginManager.disablePlugin(this)
+            return
         }
 
         try {
@@ -82,6 +88,8 @@ class Residential : JavaPlugin() {
             }
         } catch (e: Throwable) {
             ExceptionUtil.createReport("start:end", e)
+            instance.server.pluginManager.disablePlugin(this)
+            return
         }
     }
 

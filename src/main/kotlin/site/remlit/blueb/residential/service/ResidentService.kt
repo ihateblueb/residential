@@ -1,6 +1,7 @@
 package site.remlit.blueb.residential.service
 
 import site.remlit.blueb.residential.Database
+import site.remlit.blueb.residential.event.TownJoinEvent
 import site.remlit.blueb.residential.model.Resident
 import java.util.UUID
 import kotlin.use

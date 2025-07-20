@@ -1,5 +1,5 @@
 #
-#   RESIDENTIAL
+#   Residential Configuration
 #
 
 # Important: SQLite is not recommended for running in production.
@@ -8,7 +8,8 @@
 # many players.
 #
 # Consider using Postgres or MySQL as an alternative.
-# Changing this will reset the Residential data of your server.
+# Changing the database you use will reset all data related
+# to Residential on your server.
 #
 # options: sqlite, mysql, postgres
 database: "sqlite"
@@ -23,7 +24,7 @@ database: "sqlite"
 #   user: residential
 #   password: residential
 
-# Residential will only allow function in these worlds.
+# Residential will only allow claiming in these worlds.
 worlds:
   - "world"
   - "world_nether"
