@@ -5,7 +5,11 @@ import co.aikar.commands.annotation.CommandAlias
 import co.aikar.commands.annotation.CommandPermission
 import co.aikar.commands.annotation.Subcommand
 import org.bukkit.command.CommandSender
+import org.bukkit.entity.Player
 import site.remlit.blueb.residential.Configuration
+import site.remlit.blueb.residential.model.GracefulCommandException
+import site.remlit.blueb.residential.service.InboxService
+import site.remlit.blueb.residential.service.ResidentService
 import site.remlit.blueb.residential.util.MessageUtil
 import site.remlit.blueb.residential.util.inline.safeCommand
 
@@ -18,5 +22,22 @@ class AdminCommand : BaseCommand() {
         safeCommand(sender) {
             Configuration.load()
             MessageUtil.send(sender, "<dark_green>Reloaded configuration.")
+        }
+
+    @Subcommand("announce")
+    fun announce(sender: CommandSender, args: Array<String>) =
+        safeCommand(sender) {
+            val message = args.joinToString(" ")
+
+            if (message.isBlank())
+                throw GracefulCommandException("Announcement cannot be blank.")
+
+            val residents = ResidentService.getAll()
+            for (resident in residents) {
+                InboxService.sendFromSystem(resident.uuid, message)
+                MessageUtil.send(sender, "<dark_green>Sent announcement to ${resident.getPlayer().name}.")
+            }
+
+            MessageUtil.send(sender, "<dark_green>Sent announcement.")
         }
 }

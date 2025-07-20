@@ -287,6 +287,13 @@ class Database {
                     stmt.execute("UPDATE database_meta SET version = 13 WHERE id = 'r'")
                     Residential.instance.logger.info("Updated database schema to version 13")
                 }
+
+                if (version <= 13) {
+                    stmt.execute("CREATE TABLE inbox_message (uuid text, player text, message text)")
+
+                    stmt.execute("UPDATE database_meta SET version = 14 WHERE id = 'r'")
+                    Residential.instance.logger.info("Updated database schema to version 14")
+                }
             }
         }
 

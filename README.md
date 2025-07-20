@@ -9,6 +9,10 @@ Java 21+, Paper 1.20+
 Residential intends to be a complete replacement for TownyAdvanced.
 There will be both towns and nations. Both will have individual role systems allowing for different administrative actions (e.g. towns have a default "Land Manager" role that can use /t claim and /t unclaim).
 
+## Inbox
+
+Residents will have access to `/inbox`, a place where both towns and nations can send messages to communicate with their residents. Residential may also send messages to resident inboxes.
+
 ### Clock
 
 Residential has a day system like Towny's. Every 5 minutes, the clock ticks. After 24 hours worth of ticks, a new day occurs and the clock is reset.
@@ -20,6 +24,8 @@ Towns will be chunk based.
 ### Nations
 
 Nations will require at least one member town and require a capitol. The capitol's mayor does not have to be the nation's leader, but they can be.
+Nations may distribute funds to towns by a flat amount or based on residents. 
+Nations may distribute funds to residents by a flat amount.
 
 #### Elections (maybe)
 
@@ -37,8 +43,13 @@ Voting will be ranked choice.
 
 Both towns and nations will have tax systems. The server can tax towns, nations, and residents. Nations can tax towns. Towns can tax residents.
 The server, nations, and towns, can allow taxes to be overdue at an additional cost with set timeframes before a taxpayer is deleted or abandoned (town), or kicked from the nation or town.
+Towns may tax based on number of plots owned.
 Tax can be balance percentage based.
 The server tax on towns can be based on additional bought chunks or be a flat fee or percentage.
+
+### Warps
+
+Both nations and towns will have a warp system only available to residents.
 
 ### War
 
