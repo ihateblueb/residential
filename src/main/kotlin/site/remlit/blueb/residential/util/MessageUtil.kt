@@ -65,7 +65,10 @@ class MessageUtil {
 
         fun formatBoolean(boolean: Boolean, color: Boolean = false): String {
             val prefix = if (color && boolean) "<green>" else if (color) "<red>" else ""
-            return prefix + if (boolean) "✔" else "✘"
+            val suffix = if (color && boolean) "</green>" else if (color) "</red>" else ""
+            return prefix + (if (boolean) "✔" else "✘") + suffix
         }
+
+        fun bullet(): String = "<dark_gray>•</dark_gray>"
     }
 }

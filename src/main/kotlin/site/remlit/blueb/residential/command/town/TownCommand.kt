@@ -9,13 +9,11 @@ import co.aikar.commands.annotation.Default
 import co.aikar.commands.annotation.Description
 import co.aikar.commands.annotation.Subcommand
 import co.aikar.commands.annotation.Syntax
-import net.milkbowl.vault.economy.EconomyResponse
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import site.remlit.blueb.residential.Commands
 import site.remlit.blueb.residential.Configuration
 import site.remlit.blueb.residential.Residential
-import site.remlit.blueb.residential.model.FireworkType
 import site.remlit.blueb.residential.util.inline.safeCommand
 import site.remlit.blueb.residential.model.GracefulCommandException
 import site.remlit.blueb.residential.service.ChunkService
@@ -51,13 +49,13 @@ class TownCommand : BaseCommand() {
 
             val allClaimedChunks = ChunkService.getAllClaimedChunks(town.uuid)
 
+            val div = MessageUtil.bullet()
+
             MessageUtil.send(player, MessageUtil.createLine(town.name))
             MessageUtil.send(player, "Founded ${MessageUtil.formatLocalDateTime(town.foundedAt)}${if (founder != null) " by ${founder.name}" else ""}")
-            MessageUtil.send(player, "Mayor: ${mayor?.name}")
-            MessageUtil.send(player, "Balance: ${Residential.economy.format(town.balance)}")
-            MessageUtil.send(player, "Claimed ${allClaimedChunks.size}/${town.getMaxChunks()}")
-            MessageUtil.send(player, "Residents: ${town.getResidentCount()}")
-            MessageUtil.send(player, "Open: ${if (town.open) "T" else "F"} PVP: ${if (town.pvp) "T" else "F"} Mobs: ${if (town.mobs) "T" else "F"} Fire: ${if (town.fire) "T" else "F"}")
+            MessageUtil.send(player, "Mayor: ${mayor?.name} $div Balance: ${Residential.economy.format(town.balance)}")
+            MessageUtil.send(player, "Residents: ${town.getResidentCount()} $div Claimed ${allClaimedChunks.size}/${town.getMaxChunks()}")
+            MessageUtil.send(player, "Open: ${MessageUtil.formatBoolean(town.open, true)} $div PVP: ${MessageUtil.formatBoolean(town.pvp, true)} $div Mobs: ${MessageUtil.formatBoolean(town.mobs, true)} $div Fire: ${MessageUtil.formatBoolean(town.fire, true)}")
             MessageUtil.send(player, MessageUtil.createLine())
         }
 
