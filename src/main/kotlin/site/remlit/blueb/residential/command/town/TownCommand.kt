@@ -4,6 +4,7 @@ import co.aikar.commands.BaseCommand
 import co.aikar.commands.annotation.CommandAlias
 import co.aikar.commands.annotation.CommandCompletion
 import co.aikar.commands.annotation.CommandPermission
+import co.aikar.commands.annotation.Conditions
 import co.aikar.commands.annotation.Default
 import co.aikar.commands.annotation.Description
 import co.aikar.commands.annotation.Subcommand
@@ -32,6 +33,7 @@ class TownCommand : BaseCommand() {
 
     @Default
     @Syntax("<town>")
+    @Conditions("isPlayer")
     @CommandCompletion("@towns")
     @Description("Get information about a town")
     fun default(sender: CommandSender, args: Array<String>) =
@@ -61,6 +63,7 @@ class TownCommand : BaseCommand() {
 
     @Subcommand("new")
     @Syntax("<town>")
+    @Conditions("isPlayer|notInTown")
     @CommandPermission("residential.town.new")
     @Description("Create a new town")
     fun new(sender: CommandSender, args: Array<String>) =
@@ -74,8 +77,8 @@ class TownCommand : BaseCommand() {
             if (name.isNullOrBlank())
                 throw GracefulCommandException("<red>Town name cannot be blank.")
 
-            if (name.length > Configuration.Companion.config.town.name.maxLength)
-                throw GracefulCommandException("<red>Town name cannot be longer than ${Configuration.Companion.config.town.name.maxLength} characters.")
+            if (name.length > Configuration.config.town.name.maxLength)
+                throw GracefulCommandException("<red>Town name cannot be longer than ${Configuration.config.town.name.maxLength} characters.")
 
             val balance = Residential.economy.getBalance(player)
             if (balance < Configuration.config.town.cost)
@@ -87,23 +90,25 @@ class TownCommand : BaseCommand() {
 
     @Subcommand("spawn")
     @Syntax("<town>")
+    @Conditions("isPlayer") // todo: spawn perm check
     @CommandCompletion("@towns")
     @CommandPermission("residential.town.spawn")
     @Description("Teleport to the spawn of a town")
     fun spawn(sender: CommandSender, args: Array<String>) =
         safeCommand(sender) {
             val player = sender as Player
-            val resident = ResidentService.Companion.get(player.uniqueId)
+            val resident = ResidentService.get(player.uniqueId)
             val town = if (args.getOrNull(0) != null) TownService.getByName(args[0]) else resident?.getTown()
 
             if (town == null)
                 throw GracefulCommandException("<red>You aren't in a town, please specify one.")
 
-            TownService.Companion.teleport(town.uuid, player.uniqueId)
+            TownService.teleport(town.uuid, player.uniqueId)
         }
 
     @Subcommand("join")
     @Syntax("<town>")
+    @Conditions("isPlayer|notInTown")
     @CommandCompletion("@towns")
     @CommandPermission("residential.town.join")
     @Description("Join a town")
@@ -111,9 +116,6 @@ class TownCommand : BaseCommand() {
         safeCommand(sender) {
             val player = sender as Player
             val resident = ResidentService.get(player.uniqueId)!!
-
-            if (resident.town != null)
-                throw GracefulCommandException("<red>You're already in a town.")
 
             val townName = args.getOrNull(0)
             if (townName == null)
@@ -130,34 +132,30 @@ class TownCommand : BaseCommand() {
         }
 
     @Subcommand("claim")
+    @Conditions("isPlayer|inTown|cmdPlotManagement")
     @CommandPermission("residential.town.claim")
     @Description("Claim the current chunk you're standing in for you town")
     fun claim(sender: CommandSender, args: Array<String>) =
         safeCommand(sender) {
             val player = sender as Player
-            val resident = ResidentService.get(player.uniqueId)
-
-            if (resident?.town == null)
-                throw GracefulCommandException("<red>You aren't in a town.")
-
-            if (resident.getTownRoles().find { it.cmdPlotManagement || it.cmdMayor } == null)
-                throw GracefulCommandException("<red>You do not have plot management permissions in this town.")
+            val resident = ResidentService.get(player.uniqueId)!!
 
             val chunk = ChunkUtil.chunkToString(player.chunk)
 
-            ChunkService.claim(resident.town, chunk)
+            ChunkService.claim(resident.town!!, chunk)
             MessageUtil.send(player, "<dark_green>Claimed chunk at $chunk")
         }
 
     @Subcommand("residents")
     @Syntax("<town>")
+    @Conditions("isPlayer")
     @CommandCompletion("@towns")
     @CommandPermission("residential.town.residents")
     @Description("List all residents of a town")
     fun residents(sender: CommandSender, args: Array<String>) =
         safeCommand(sender) {
             val player = sender as Player
-            val resident = ResidentService.Companion.get(player.uniqueId)
+            val resident = ResidentService.get(player.uniqueId)
             val town = if (args.getOrNull(0) != null) TownService.getByName(args[0]) else resident?.getTown()
 
             if (town == null)
@@ -190,6 +188,7 @@ class TownCommand : BaseCommand() {
         }
 
     @Subcommand("delete")
+    @Conditions("isPlayer|inTown|isMayor")
     @CommandPermission("residential.town.delete")
     @Description("Delete your town")
     fun delete(sender: CommandSender, args: Array<String>) =
@@ -197,10 +196,29 @@ class TownCommand : BaseCommand() {
 
     @Subcommand("invite")
     @Syntax("[player]")
+    @Conditions("isPlayer|inTown") // todo: canInvite
     @CommandPermission("residential.town.invite")
     @Description("Invite a player to your town")
     fun invite(sender: CommandSender, args: Array<String>) =
         safeCommand(sender) { TODO() }
+
+    @Subcommand("announce")
+    @Syntax("[message]")
+    @Conditions("isPlayer|inTown|announce")
+    @CommandPermission("residential.town.announce")
+    @Description("Send an announcement to the town's residents")
+    fun announce(sender: CommandSender, args: Array<String>) =
+        safeCommand(sender) {
+            val player = sender as Player
+            val resident = ResidentService.get(player.uniqueId)!!
+
+            val message = args.joinToString(" ")
+            if (message.isBlank())
+                throw GracefulCommandException("<red>You can't send a blank announcement.")
+
+            TownService.announce(resident.town!!, message)
+            MessageUtil.send(sender, "<dark_green>Sent announcement.")
+        }
 
     init {
         Commands.commandManager.commandCompletions.registerCompletion("towns") {

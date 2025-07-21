@@ -22,4 +22,7 @@ data class Nation(
 ) {
     fun getLeader() = { TODO() }
     fun getCollectiveBalance() = { TODO() }
+
+    fun getTowns() = { TODO() }
+    fun getResidents() = { TODO() }
 }

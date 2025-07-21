@@ -9,7 +9,7 @@ Java 21+, Paper 1.20+
 Residential intends to be a complete replacement for TownyAdvanced.
 There will be both towns and nations. Both will have individual role systems allowing for different administrative actions (e.g. towns have a default "Land Manager" role that can use /t claim and /t unclaim).
 
-## Inbox
+### Inbox
 
 Residents will have access to `/inbox`, a place where both towns and nations can send messages to communicate with their residents. Residential may also send messages to resident inboxes.
 
@@ -20,6 +20,13 @@ Residential has a day system like Towny's. Every 5 minutes, the clock ticks. Aft
 ### Towns
 
 Towns will be chunk based.
+
+#### Land Protection
+
+Mob removal: On spawn event, timer for removing ones wandering in
+Fire
+Explosion
+PVP
 
 ### Nations
 

@@ -226,5 +226,16 @@ class TownService {
                 stmt.execute()
             }
         }
+
+        fun announce(uuid: UUID, message: String) {
+            val town = get(uuid)
+
+            if (town == null)
+                throw GracefulCommandException("Town doesn't exist.")
+
+            for (resident in getResidents(uuid)) {
+                InboxService.send(resident.uuid, town.name, message)
+            }
+        }
     }
 }

@@ -3,6 +3,7 @@ package site.remlit.blueb.residential.command.town
 import co.aikar.commands.BaseCommand
 import co.aikar.commands.annotation.CommandAlias
 import co.aikar.commands.annotation.CommandPermission
+import co.aikar.commands.annotation.Conditions
 import co.aikar.commands.annotation.Default
 import co.aikar.commands.annotation.Description
 import co.aikar.commands.annotation.Subcommand
@@ -23,6 +24,7 @@ import site.remlit.blueb.residential.util.inline.safeCommand
 @Description("Commands for managing town banks")
 class TownBankCommand : BaseCommand() {
     @Default
+    @Conditions("isPlayer|inTown")
     fun default(sender: CommandSender, args: Array<String>) =
         safeCommand(sender) {
             val player = sender as Player
@@ -38,18 +40,13 @@ class TownBankCommand : BaseCommand() {
 
     @Subcommand("deposit")
     @Syntax("[amount]")
+    @Conditions("isPlayer|inTown|bankDeposit")
     @CommandPermission("residential.town.deposit")
     @Description("Deposit money to your town bank")
     fun deposit(sender: CommandSender, args: Array<String>) =
         safeCommand(sender) {
             val player = sender as Player
-            val resident = ResidentService.get(player.uniqueId)
-
-            if (resident?.town == null)
-                throw GracefulCommandException("<red>You aren't in a town.")
-
-            if (resident.getTownRoles().find { it.bankDeposit || it.cmdMayor } == null)
-                throw GracefulCommandException("<red>You do not have bank deposit permissions in this town.")
+            val resident = ResidentService.get(player.uniqueId)!!
 
             val amount = args.getOrNull(0)?.toDoubleOrNull()
 
@@ -65,23 +62,18 @@ class TownBankCommand : BaseCommand() {
             if (Residential.economy.withdrawPlayer(player, amount).type != EconomyResponse.ResponseType.SUCCESS)
                 throw GracefulCommandException("<red>Failed to withdraw from your account.")
 
-            TownService.deposit(resident.town, amount)
+            TownService.deposit(resident.town!!, amount)
         }
 
     @Subcommand("withdraw")
     @Syntax("[amount]")
+    @Conditions("isPlayer|inTown|bankWithdraw")
     @CommandPermission("residential.town.withdraw")
     @Description("Withdraw money from your town bank")
     fun withdraw(sender: CommandSender, args: Array<String>) =
         safeCommand(sender) {
             val player = sender as Player
-            val resident = ResidentService.get(player.uniqueId)
-
-            if (resident?.town == null)
-                throw GracefulCommandException("<red>You aren't in a town.")
-
-            if (resident.getTownRoles().find { it.bankWithdraw || it.cmdMayor } == null)
-                throw GracefulCommandException("<red>You do not have bank withdraw permissions in this town.")
+            val resident = ResidentService.get(player.uniqueId)!!
 
             val amount = args.getOrNull(0)?.toDoubleOrNull()
 
@@ -91,7 +83,7 @@ class TownBankCommand : BaseCommand() {
             if (amount < 0.01)
                 throw GracefulCommandException("<red>You must withdraw at least ${Residential.economy.format(0.01)}.")
 
-            val town = TownService.get(resident.town)!!
+            val town = TownService.get(resident.town!!)!!
             if (town.balance < amount)
                 throw GracefulCommandException("<red>Your town doesn't have enough money.")
 

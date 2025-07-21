@@ -3,6 +3,7 @@ package site.remlit.blueb.residential.command.town
 import co.aikar.commands.BaseCommand
 import co.aikar.commands.annotation.CommandAlias
 import co.aikar.commands.annotation.CommandPermission
+import co.aikar.commands.annotation.Conditions
 import co.aikar.commands.annotation.Description
 import co.aikar.commands.annotation.Subcommand
 import co.aikar.commands.annotation.Syntax
@@ -22,73 +23,59 @@ import site.remlit.blueb.residential.util.MessageUtil
 class TownSetCommand : BaseCommand() {
     @Subcommand("name")
     @Syntax("[name]")
+    @Conditions("isPlayer|inTown|cmdMayor")
     @CommandPermission("residential.town.set.name")
     @Description("Change the name of your town")
     fun setName(sender: CommandSender, args: Array<String>) =
         safeCommand(sender) {
             val player = sender as Player
 
-            val resident = ResidentService.get(player.uniqueId)
-
-            if (resident?.town == null)
-                throw GracefulCommandException("<red>You aren't in a town.")
-
-            if (resident.getTownRoles().find { it.cmdMayor } == null)
-                throw GracefulCommandException("<red>You do not have mayor permissions in this town.")
+            val resident = ResidentService.get(player.uniqueId)!!
 
             val name = args.getOrNull(0)
             if (name == null)
                 throw GracefulCommandException("<red>New name cannot be blank.")
 
-            TownService.setName(resident.town, name)
+            TownService.setName(resident.town!!, name)
             MessageUtil.send(player, "<dark_green>Set town name to $name.")
         }
 
     @Subcommand("open")
     @Syntax("<open>")
+    @Conditions("isPlayer|inTown|cmdMayor")
     @CommandPermission("residential.town.set.open")
     @Description("Toggle if your town is able to be joined without an invite")
     fun setOpen(sender: CommandSender, args: Array<String>) =
         safeCommand(sender) {
             val player = sender as Player
 
-            val resident = ResidentService.get(player.uniqueId)
+            val resident = ResidentService.get(player.uniqueId)!!
 
-            if (resident?.town == null)
-                throw GracefulCommandException("<red>You aren't in a town.")
-
-            if (resident.getTownRoles().find { it.cmdMayor } == null)
-                throw GracefulCommandException("<red>You do not have mayor permissions in this town.")
-
-            val open: Boolean = TownService.setOpen(resident.town, args.getOrNull(0)?.toBoolean())
+            val open: Boolean = TownService.setOpen(resident.town!!, args.getOrNull(0)?.toBoolean())
             if (open) MessageUtil.send(player, "<dark_green>Set town to be open for players to join.")
             else MessageUtil.send(player, "<dark_green>Set town to be closed for players to join.")
         }
 
     @Subcommand("spawn")
+    @Conditions("isPlayer|inTown|cmdMayor")
     @CommandPermission("residential.town.set.spawn")
     @Description("Change the spawn of your town")
     fun setSpawn(sender: CommandSender, args: Array<String>) =
         safeCommand(sender) {
             val player = sender as Player
 
-            val resident = ResidentService.get(player.uniqueId)
-
-            if (resident?.town == null)
-                throw GracefulCommandException("<red>You aren't in a town.")
-
-            if (resident.getTownRoles().find { it.cmdMayor } == null)
-                throw GracefulCommandException("<red>You do not have mayor permissions in this town.")
+            val resident = ResidentService.get(player.uniqueId)!!
 
             val chunk = ChunkUtil.chunkToString(player.chunk)
             val location = LocationUtil.locationToString(player.location)
 
-            TownService.setSpawn(resident.town, chunk, location)
+            TownService.setSpawn(resident.town!!, chunk, location)
             MessageUtil.send(player, "<dark_green>Set spawn location")
         }
 
     @Subcommand("mayor")
     @Syntax("[name]")
+    @Conditions("isPlayer|inTown|isMayor")
     @CommandPermission("residential.town.set.mayor")
     @Description("Change the mayor of your town")
     fun setMayor(sender: CommandSender, args: Array<String>) =
@@ -96,6 +83,7 @@ class TownSetCommand : BaseCommand() {
 
     @Subcommand("tag")
     @Syntax("[tag]")
+    @Conditions("isPlayer|inTown|cmdMayor")
     @CommandPermission("residential.town.set.tag")
     @Description("Change the tag of your town")
     fun setTag(sender: CommandSender, args: Array<String>) =

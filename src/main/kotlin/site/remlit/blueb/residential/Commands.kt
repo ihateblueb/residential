@@ -2,6 +2,7 @@ package site.remlit.blueb.residential
 
 import co.aikar.commands.PaperCommandManager
 import site.remlit.blueb.residential.command.*
+import site.remlit.blueb.residential.command.condition.*
 import site.remlit.blueb.residential.command.town.*
 
 class Commands {
@@ -12,6 +13,9 @@ class Commands {
         fun register() {
             Residential.commandManager = commandManager
 
+            PlayerConditions.register()
+            TownConditions.register()
+
             commandManager.registerCommand(ResidentialCommand())
             commandManager.registerCommand(AdminCommand())
             commandManager.registerCommand(DebugCommand())
@@ -19,6 +23,7 @@ class Commands {
 
             commandManager.registerCommand(TownBankCommand())
             commandManager.registerCommand(TownCommand())
+            commandManager.registerCommand(TownRoleCommand())
             commandManager.registerCommand(TownSetCommand())
             commandManager.registerCommand(TownWarpCommand())
         }

@@ -3,6 +3,7 @@ package site.remlit.blueb.residential.service
 import site.remlit.blueb.residential.Residential
 import site.remlit.blueb.residential.Configuration
 import site.remlit.blueb.residential.Database
+import site.remlit.blueb.residential.Logger
 import site.remlit.blueb.residential.model.GracefulCommandException
 import site.remlit.blueb.residential.model.TownRole
 import site.remlit.blueb.residential.util.DatabaseUtil
@@ -64,8 +65,15 @@ class TownRoleService {
             isDefault: Boolean = false,
             isMayor: Boolean = false,
 
+            destroy: Boolean = false,
+            place: Boolean = false,
+            use: Boolean = false,
+            spawn: Boolean = false,
+
             bankWithdraw: Boolean = false,
             bankDeposit: Boolean = true,
+
+            announce: Boolean = false,
 
             cmdPlotManagement: Boolean = false,
             cmdMayor: Boolean = false
@@ -90,7 +98,7 @@ class TownRoleService {
 
             val uuid = UUID.randomUUID()
 
-            connection.prepareStatement("INSERT INTO town_role (uuid, town, name, is_default, is_mayor, bank_withdraw, bank_deposit, cmd_plot_management, cmd_mayor) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)").use { stmt ->
+            connection.prepareStatement("INSERT INTO town_role (uuid, town, name, is_default, is_mayor, bank_withdraw, bank_deposit, announce, cmd_plot_management, cmd_mayor) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)").use { stmt ->
                 stmt.setString(1, uuid.toString())
                 stmt.setString(2, town.toString())
                 stmt.setString(3, name)
@@ -101,12 +109,14 @@ class TownRoleService {
                 stmt.setBoolean(6, bankWithdraw)
                 stmt.setBoolean(7, bankDeposit)
 
-                stmt.setBoolean(8, cmdPlotManagement)
-                stmt.setBoolean(9, cmdMayor)
+                stmt.setBoolean(8, announce)
+
+                stmt.setBoolean(9, cmdPlotManagement)
+                stmt.setBoolean(10, cmdMayor)
                 stmt.execute()
             }
 
-            Residential.instance.logger.info("Created role $uuid named $name")
+            Logger.info("Created role $uuid named $name")
         }
 
         fun giveRole(player: UUID, role: UUID) {
@@ -128,27 +138,37 @@ class TownRoleService {
             val mayorRole = getByName(town, "mayor")
             if (mayorRole == null) throw GracefulCommandException("Mayor role does not exist.")
 
+            // TODO
+        }
 
+        fun createFromSplit(town: UUID, split: List<String>) {
+            create(
+                town,
+                split[0],
+
+                split[1].toBoolean(), // isDefault
+                split[2].toBoolean(), // isMayor
+
+                split[3].toBoolean(), // destroy
+                split[4].toBoolean(), // place
+                split[5].toBoolean(), // use
+                split[6].toBoolean(), // spawn
+
+                split[7].toBoolean(), // bankWithdraw
+                split[8].toBoolean(), // bankDeposit
+
+                split[9].toBoolean(), // announce
+
+                split[10].toBoolean(), // cmdPlotManagement
+                split[11].toBoolean(), // cmdMayor
+            )
         }
 
         fun createDefaults(town: UUID) {
             val configDefaults = Configuration.config.town!!.roles.default
             for (role in configDefaults) {
                 val split = role.split(",")
-
-                create(
-                    town,
-                    split[0],
-
-                    split[1].toBoolean(),
-                    split[2].toBoolean(),
-
-                    split[3].toBoolean(),
-                    split[4].toBoolean(),
-
-                    split[5].toBoolean(),
-                    split[6].toBoolean()
-                )
+                createFromSplit(town, split)
             }
         }
 
@@ -156,40 +176,14 @@ class TownRoleService {
             val configDefaults = Configuration.config.town!!.roles.default
             val defaultRole = configDefaults.find { it.split(",")[1].toBoolean() }
             val split = defaultRole?.split(",") ?: listOf()
-
-            create(
-                town,
-                split[0],
-
-                split[1].toBoolean(),
-                split[2].toBoolean(),
-
-                split[3].toBoolean(),
-                split[4].toBoolean(),
-
-                split[5].toBoolean(),
-                split[6].toBoolean()
-            )
+            createFromSplit(town, split)
         }
 
         fun createMayorRole(town: UUID) {
             val configDefaults = Configuration.config.town!!.roles.default
             val mayorRole = configDefaults.find { it.split(",")[2].toBoolean() }
             val split = mayorRole?.split(",") ?: listOf()
-
-            create(
-                town,
-                split[0],
-
-                split[1].toBoolean(),
-                split[2].toBoolean(),
-
-                split[3].toBoolean(),
-                split[4].toBoolean(),
-
-                split[5].toBoolean(),
-                split[6].toBoolean()
-            )
+            createFromSplit(town, split)
         }
 
         fun syncRoles() {

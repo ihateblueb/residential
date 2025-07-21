@@ -62,5 +62,10 @@ class MessageUtil {
             if (includeTime) string += " at ${localDateTime.hour}:${localDateTime.minute}"
             return string
         }
+
+        fun formatBoolean(boolean: Boolean, color: Boolean = false): String {
+            val prefix = if (color && boolean) "<green>" else if (color) "<red>" else ""
+            return prefix + if (boolean) "✔" else "✘"
+        }
     }
 }

@@ -9,6 +9,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import site.remlit.blueb.residential.Clock
 import site.remlit.blueb.residential.Commands
+import site.remlit.blueb.residential.Database
 import site.remlit.blueb.residential.event.NewDayEvent
 import site.remlit.blueb.residential.model.FireworkType
 import site.remlit.blueb.residential.model.GracefulCommandException
@@ -118,6 +119,12 @@ class DebugCommand : BaseCommand() {
     fun newDayEvent(sender: CommandSender, args: Array<String>) =
         safeCommand(sender) {
             NewDayEvent().callEvent()
+        }
+
+    @Subcommand("dbsetup")
+    fun dbSetup(sender: CommandSender, args: Array<String>) =
+        safeCommand(sender) {
+            Database.setup()
         }
 
     init {

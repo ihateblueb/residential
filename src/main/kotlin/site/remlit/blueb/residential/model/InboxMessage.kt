@@ -6,7 +6,7 @@ import java.util.UUID
 data class InboxMessage(
     val uuid: UUID,
     val player: UUID,
-    val from: String,
+    val sender: String,
     val message: String
 ) {
     companion object {
@@ -15,7 +15,7 @@ data class InboxMessage(
                 return InboxMessage(
                     uuid = UUID.fromString(rs.getString("uuid")),
                     player = UUID.fromString(rs.getString("player")),
-                    from = rs.getString("from"),
+                    sender = rs.getString("sender"),
                     message = rs.getString("message")
                 )
             }
@@ -29,7 +29,7 @@ data class InboxMessage(
                     InboxMessage(
                         uuid = UUID.fromString(rs.getString("uuid")),
                         player = UUID.fromString(rs.getString("player")),
-                        from = rs.getString("from"),
+                        sender = rs.getString("sender"),
                         message = rs.getString("message")
                     )
                 )

@@ -28,10 +28,10 @@ data class TownConfig(
     val claimableChunks: ClaimableChunksConfig = ClaimableChunksConfig(500, 15, 50, 15),
     val permissions: PermissionsConfig = PermissionsConfig(1, 3, 3, 3, 2),
     val roles: RolesConfig = RolesConfig(15, listOf(
-        "Mayor,false,true,true,true,true,true",
-        "Treasurer,false,false,true,true,false,false",
-        "Land Manager,false,false,false,false,true,false",
-        "Resident,true,false,false,true,false,false"
+        "Mayor,false,true,true,true,true,true,true",
+        "Treasurer,false,false,true,true,false,false,false",
+        "Land Manager,false,false,false,false,false,true,false",
+        "Resident,true,false,false,true,false,false,false"
     )),
     val abandonment: Boolean = true,
     val tax: TownTaxConfig = TownTaxConfig(

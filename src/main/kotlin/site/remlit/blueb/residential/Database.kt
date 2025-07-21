@@ -91,7 +91,7 @@ class Database {
                     }
                 }
 
-                Residential.instance.logger.info("Current database schema version is $version")
+                Logger.info("Current database schema version is $version")
 
                 if (version <= 0) {
                     stmt.execute("CREATE TABLE resident(uuid ${uuidOrVarchar()} primary key)")
@@ -119,7 +119,7 @@ class Database {
                     stmt.execute("ALTER TABLE nation ADD COLUMN towns text NULL")
 
                     stmt.execute("UPDATE database_meta SET version = 1 WHERE id = 'r'")
-                    Residential.instance.logger.info("Updated database schema to version 1")
+                    Logger.info("Updated database schema to version 1")
                 }
 
                 if (version <= 1) {
@@ -133,7 +133,7 @@ class Database {
                     stmt.execute("ALTER TABLE nation ADD COLUMN founder ${uuidOrVarchar()} NULL")
 
                     stmt.execute("UPDATE database_meta SET version = 2 WHERE id = 'r'")
-                    Residential.instance.logger.info("Updated database schema to version 2")
+                    Logger.info("Updated database schema to version 2")
                 }
 
                 if (version <= 2) {
@@ -142,7 +142,7 @@ class Database {
                     stmt.execute("ALTER TABLE nation ADD COLUMN foundedAt varchar(125)")
 
                     stmt.execute("UPDATE database_meta SET version = 3 WHERE id = 'r'")
-                    Residential.instance.logger.info("Updated database schema to version 3")
+                    Logger.info("Updated database schema to version 3")
                 }
 
                 if (version <= 3) {
@@ -164,14 +164,14 @@ class Database {
                     stmt.execute("ALTER TABLE plot ADD COLUMN spawn varchar(264) NULL")
 
                     stmt.execute("UPDATE database_meta SET version = 4 WHERE id = 'r'")
-                    Residential.instance.logger.info("Updated database schema to version 4")
+                    Logger.info("Updated database schema to version 4")
                 }
 
                 if (version <= 4) {
                     stmt.execute("ALTER TABLE chunk ADD COLUMN world varchar(64)")
 
                     stmt.execute("UPDATE database_meta SET version = 5 WHERE id = 'r'")
-                    Residential.instance.logger.info("Updated database schema to version 5")
+                    Logger.info("Updated database schema to version 5")
                 }
 
                 if (version <= 5) {
@@ -206,7 +206,7 @@ class Database {
                     stmt.execute("ALTER TABLE town_role ADD COLUMN cmd_mayor boolean default false")
 
                     stmt.execute("UPDATE database_meta SET version = 6 WHERE id = 'r'")
-                    Residential.instance.logger.info("Updated database schema to version 6")
+                    Logger.info("Updated database schema to version 6")
                 }
 
                 if (version <= 6) {
@@ -215,7 +215,7 @@ class Database {
                     stmt.execute("ALTER TABLE resident ADD COLUMN roles text NULL")
 
                     stmt.execute("UPDATE database_meta SET version = 7 WHERE id = 'r'")
-                    Residential.instance.logger.info("Updated database schema to version 7")
+                    Logger.info("Updated database schema to version 7")
                 }
 
                 if (version <= 7) {
@@ -230,7 +230,7 @@ class Database {
                     stmt.execute("ALTER TABLE nation ADD COLUMN taxPercent boolean default false")
 
                     stmt.execute("UPDATE database_meta SET version = 8 WHERE id = 'r'")
-                    Residential.instance.logger.info("Updated database schema to version 8")
+                    Logger.info("Updated database schema to version 8")
                 }
 
                 if (version <= 8) {
@@ -244,14 +244,14 @@ class Database {
                     stmt.execute("ALTER TABLE chunk ADD COLUMN location varchar(256)")
 
                     stmt.execute("UPDATE database_meta SET version = 9 WHERE id = 'r'")
-                    Residential.instance.logger.info("Updated database schema to version 9")
+                    Logger.info("Updated database schema to version 9")
                 }
 
                 if (version <= 9) {
                     stmt.execute("ALTER TABLE town ADD COLUMN open boolean default false")
 
                     stmt.execute("UPDATE database_meta SET version = 10 WHERE id = 'r'")
-                    Residential.instance.logger.info("Updated database schema to version 10")
+                    Logger.info("Updated database schema to version 10")
                 }
 
                 if (version <= 10) {
@@ -262,7 +262,7 @@ class Database {
                     stmt.execute("ALTER TABLE town ADD COLUMN balance double precision default 0.0")
 
                     stmt.execute("UPDATE database_meta SET version = 11 WHERE id = 'r'")
-                    Residential.instance.logger.info("Updated database schema to version 11")
+                    Logger.info("Updated database schema to version 11")
                 }
 
                 if (version <= 11) {
@@ -272,7 +272,7 @@ class Database {
                     stmt.execute("INSERT INTO clock (id, state) VALUES ('r', 0)")
 
                     stmt.execute("UPDATE database_meta SET version = 12 WHERE id = 'r'")
-                    Residential.instance.logger.info("Updated database schema to version 12")
+                    Logger.info("Updated database schema to version 12")
                 }
 
                 if (version <= 12) {
@@ -285,14 +285,28 @@ class Database {
                     stmt.execute("ALTER TABLE town ADD COLUMN taxMaxLate int null default null")
 
                     stmt.execute("UPDATE database_meta SET version = 13 WHERE id = 'r'")
-                    Residential.instance.logger.info("Updated database schema to version 13")
+                    Logger.info("Updated database schema to version 13")
                 }
 
                 if (version <= 13) {
-                    stmt.execute("CREATE TABLE inbox_message (uuid text, player text, message text)")
+                    stmt.execute("CREATE TABLE inbox_message (uuid text, player text, sender text, message text)")
+
+                    stmt.execute("ALTER TABLE town_role ADD COLUMN announce bool default false")
 
                     stmt.execute("UPDATE database_meta SET version = 14 WHERE id = 'r'")
-                    Residential.instance.logger.info("Updated database schema to version 14")
+                    Logger.info("Updated database schema to version 14")
+                }
+
+                if (version <= 14) {
+                    stmt.execute("DROP TABLE town_permission")
+
+                    stmt.execute("ALTER TABLE town_role ADD COLUMN destroy bool default false")
+                    stmt.execute("ALTER TABLE town_role ADD COLUMN place bool default false")
+                    stmt.execute("ALTER TABLE town_role ADD COLUMN use bool default false")
+                    stmt.execute("ALTER TABLE town_role ADD COLUMN spawn bool default true")
+
+                    stmt.execute("UPDATE database_meta SET version = 15 WHERE id = 'r'")
+                    Logger.info("Updated database schema to version 15")
                 }
             }
         }
