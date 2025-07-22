@@ -1,7 +1,8 @@
-package site.remlit.blueb.residential
+package site.remlit.blueb.residential.integration
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion
 import org.bukkit.entity.Player
+import site.remlit.blueb.residential.Residential
 import site.remlit.blueb.residential.model.Town
 import site.remlit.blueb.residential.service.ChunkService
 import site.remlit.blueb.residential.service.ResidentService
@@ -10,10 +11,10 @@ import site.remlit.blueb.residential.util.ChunkUtil
 import site.remlit.blueb.residential.util.ExceptionUtil
 import java.util.UUID
 
-class Expansion : PlaceholderExpansion() {
+class PlaceholderExpansion : PlaceholderExpansion() {
     override fun getIdentifier(): String = "residential"
-    override fun getAuthor(): String = Residential.instance.pluginMeta.authors.first()
-    override fun getVersion(): String = Residential.instance.pluginMeta.version
+    override fun getAuthor(): String = Residential.Companion.instance.pluginMeta.authors.first()
+    override fun getVersion(): String = Residential.Companion.instance.pluginMeta.version
 
     override fun onPlaceholderRequest(player: Player?, params: String): String? {
         val split = params.split("_")
@@ -51,10 +52,10 @@ class Expansion : PlaceholderExpansion() {
             if (thing == "fire") return town.open.toString()
 
             if (thing == "balance" && thingModifier == null) return town.balance.toString()
-            if (thing == "balance" && thingModifier == "formatted") return Residential.economy.format(town.balance)
+            if (thing == "balance" && thingModifier == "formatted") return Residential.Companion.economy.format(town.balance)
 
             if (thing == "tax" && thingModifier == null) return town.tax.toString()
-            if (thing == "tax" && thingModifier == "formatted") return if (town.taxPercent) "${town.tax}%" else Residential.economy.format(town.tax)
+            if (thing == "tax" && thingModifier == "formatted") return if (town.taxPercent) "${town.tax}%" else Residential.Companion.economy.format(town.tax)
 
             if (thing == "taxDebt" && thingModifier == null) return town.taxDebt.toString()
             if (thing == "taxFeeMultiplier" && thingModifier == null) return town.taxFeeMultiplier.toString()
@@ -71,19 +72,19 @@ class Expansion : PlaceholderExpansion() {
                 return townPlaceholders(
                     if (split.getOrNull(1) != null && isUuid(split[1])) {
                         indexModifier++
-                        TownService.get(UUID.fromString(split[1]))
+                        TownService.Companion.get(UUID.fromString(split[1]))
                     }
-                    else if (player != null) TownService.get(ResidentService.get(player.uniqueId)!!.town!!)
+                    else if (player != null) TownService.Companion.get(ResidentService.Companion.get(player.uniqueId)!!.town!!)
                     else null
                 )
             } else if (split.getOrNull(0) == "townIn") {
                 if (player == null) return null
                 return townPlaceholders(
-                    TownService.get(ChunkService.get(ChunkUtil.chunkToString(player.location.chunk))?.town ?: return null)
+                    TownService.Companion.get(ChunkService.Companion.get(ChunkUtil.Companion.chunkToString(player.location.chunk))?.town ?: return null)
                 )
             }
         } catch (e: Throwable) {
-            ExceptionUtil.createReport("onPlaceholderRequest:$params", e)
+            ExceptionUtil.Companion.createReport("onPlaceholderRequest:$params", e)
         }
 
         return null

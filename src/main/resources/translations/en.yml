@@ -1,0 +1,38 @@
+
+town: Town
+nation: Nation
+resident: Resident
+
+messages:
+  isPlayer: "<red>You are a player."
+  notPlayer: "<red>You aren't a player."
+
+  town:
+    doesntExist: "<red>This town doesn't exist."
+    notIn: "<red>You aren't in a town."
+    notInSpecify: "<red>You aren't in a town, please specify one."
+    alreadyIn: "<red>You're already in a town."
+
+    info:
+      foundedAt: "Founded at <foundedAt> by <founder>"
+      mayor: "Mayor: <mayor>"
+      balance: "Balance: <count>"
+      residents: "Residents: <count>"
+      claimed: "Claimed: <claimed>/<max>"
+      open: "Open: <bool>"
+      pvp: "PVP: <bool>"
+      mobs: "Mobs: <bool>"
+      fire: "Fire: <bool>"
+
+    create:
+      nameBlank: "<red>Town name cannot be blank."
+      longerThan: "<red>Town name cannot be longer than <max>."
+      cantAfford: "<red>You can't afford creating a town, which costs <cost>."
+
+    missingPermission:
+      bankWithdraw: "<red>You don't have bank withdraw permissions in this town."
+      bankDeposit: "<red>You don't have bank deposit permissions in this town."
+      announce: "<red>You don't have announcement permissions in this town."
+      cmdPlotManagement: "<red>You don't have plot management permissions in this town."
+      cmdMayor: "<red>You don't have mayor command permissions in this town."
+      isMayor: "<red>You must be mayor to run this command."

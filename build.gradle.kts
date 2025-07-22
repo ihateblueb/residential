@@ -25,22 +25,27 @@ repositories {
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/") {
         name = "extendedclip-repo"
     }
+    maven("https://repo.mikeprimm.com/") {
+        name = "mikeprimm-repo"
+    }
 }
 
 dependencies {
+    // provided by server
     compileOnly("io.papermc.paper:paper-api:1.20-R0.1-SNAPSHOT")
-    // supplied later by plugin
-    compileOnly("com.github.MilkBowl:VaultAPI:1.7")
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation(kotlin("reflect"))
-
-    compileOnly("me.clip:placeholderapi:2.11.6")
 
     implementation("org.spongepowered:configurate-yaml:4.2.0")
     implementation("org.spongepowered:configurate-extra-kotlin:4.2.0")
 
     implementation("net.kyori:adventure-api:4.23.0")
+
+    // supplied by plugins
+    compileOnly("com.github.MilkBowl:VaultAPI:1.7")
+    compileOnly("me.clip:placeholderapi:2.11.6")
+    compileOnly("us.dynmap:DynmapCoreAPI:3.7-beta-6")
 
     // supplied later by PluginLoader
     compileOnly("com.zaxxer:HikariCP:6.3.0")

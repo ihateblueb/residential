@@ -4,6 +4,8 @@ import co.aikar.commands.PaperCommandManager
 import site.remlit.blueb.residential.service.TownRoleService
 import net.milkbowl.vault.economy.Economy
 import org.bukkit.plugin.java.JavaPlugin
+import site.remlit.blueb.residential.integration.dynmap.DynmapIntegration
+import site.remlit.blueb.residential.integration.PlaceholderExpansion
 import site.remlit.blueb.residential.util.ExceptionUtil
 import java.lang.Thread.sleep
 import kotlin.concurrent.thread
@@ -55,11 +57,16 @@ class Residential : JavaPlugin() {
 
         try {
             if (instance.server.pluginManager.getPlugin("PlaceholderAPI") != null) {
-                Logger.info("Found PlaceholderAPI, registering expansion")
-                Expansion().register()
+                Logger.info("Integration", "Found PlaceholderAPI, registering integration")
+                PlaceholderExpansion().register()
+            }
+
+            if (instance.server.pluginManager.getPlugin("dynmap") != null) {
+                Logger.info("Integration", "Found Dynmap, registering integration")
+                DynmapIntegration.register()
             }
         } catch (e: Throwable) {
-            ExceptionUtil.createReport("start:placeholderapi", e)
+            ExceptionUtil.createReport("start:integration", e)
             instance.server.pluginManager.disablePlugin(this)
             return
         }
