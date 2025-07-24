@@ -6,7 +6,7 @@ import net.milkbowl.vault.economy.Economy
 import org.bukkit.plugin.java.JavaPlugin
 import site.remlit.blueb.residential.integration.dynmap.DynmapIntegration
 import site.remlit.blueb.residential.integration.PlaceholderExpansion
-import site.remlit.blueb.residential.util.ExceptionUtil
+import site.remlit.blueb.residential.util.inline.safeStart
 import java.lang.Thread.sleep
 import kotlin.concurrent.thread
 import kotlin.time.measureTime
@@ -21,27 +21,20 @@ class Residential : JavaPlugin() {
             return
         }
 
-        try {
+        safeStart("config") {
             val configTimeTaken = measureTime { Configuration.load() }
             Logger.info("Loaded configuration in ${configTimeTaken.inWholeMilliseconds} ms")
-        } catch (e: Throwable) {
-            ExceptionUtil.createReport("start:config", e)
-            instance.server.pluginManager.disablePlugin(this)
-            return
         }
 
-        try {
+        safeStart("db") {
             val dbTimeTaken = measureTime {
                 Database.connect()
                 Database.setup()
             }
             Logger.info("Connected to and setup database in ${dbTimeTaken.inWholeMilliseconds} ms")
-        } catch (e: Throwable) {
-            ExceptionUtil.createReport("start:db", e)
-            instance.server.pluginManager.disablePlugin(this)
-            return
         }
 
+        safeStart("economy") {
         if (instance.server.pluginManager.getPlugin("Vault") == null) {
             Logger.severe("Vault is required to use Residential.")
             instance.server.pluginManager.disablePlugin(this)
@@ -54,8 +47,9 @@ class Residential : JavaPlugin() {
             return
         }
         economy = rsp.provider
+        }
 
-        try {
+        safeStart("integration") {
             if (instance.server.pluginManager.getPlugin("PlaceholderAPI") != null) {
                 Logger.info("Integration", "Found PlaceholderAPI, registering integration")
                 PlaceholderExpansion().register()
@@ -65,13 +59,9 @@ class Residential : JavaPlugin() {
                 Logger.info("Integration", "Found Dynmap, registering integration")
                 DynmapIntegration.register()
             }
-        } catch (e: Throwable) {
-            ExceptionUtil.createReport("start:integration", e)
-            instance.server.pluginManager.disablePlugin(this)
-            return
         }
 
-        try {
+        safeStart("end") {
             Commands.register()
             EventListener.register()
             Clock.start()
@@ -93,10 +83,6 @@ class Residential : JavaPlugin() {
                     sleep((interval * 60) * 1000)
                 }
             }
-        } catch (e: Throwable) {
-            ExceptionUtil.createReport("start:end", e)
-            instance.server.pluginManager.disablePlugin(this)
-            return
         }
     }
 

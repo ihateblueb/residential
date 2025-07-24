@@ -112,10 +112,7 @@ class TownService {
             if (!Configuration.config.worlds.contains(world))
                 throw GracefulCommandException("You cannot create towns in this world.")
 
-            val resident = ResidentService.get(founder)
-
-            if (resident == null)
-                throw GracefulCommandException("Founder couldn't be found.")
+            val resident = ResidentService.get(founder)!!
 
             if (resident.town != null)
                 throw GracefulCommandException("You're already apart of a town.")

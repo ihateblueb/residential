@@ -5,7 +5,6 @@ import co.aikar.commands.annotation.CommandAlias
 import co.aikar.commands.annotation.CommandPermission
 import co.aikar.commands.annotation.Subcommand
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import site.remlit.blueb.residential.Configuration
 import site.remlit.blueb.residential.model.GracefulCommandException
 import site.remlit.blueb.residential.service.InboxService

@@ -3,6 +3,8 @@ town: Town
 nation: Nation
 resident: Resident
 
+invalidWorld: "<red>Residential is disabled in this world."
+
 messages:
   isPlayer: "<red>You are a player."
   notPlayer: "<red>You aren't a player."
@@ -28,6 +30,10 @@ messages:
       nameBlank: "<red>Town name cannot be blank."
       longerThan: "<red>Town name cannot be longer than <max>."
       cantAfford: "<red>You can't afford creating a town, which costs <cost>."
+
+    chunk:
+      alreadyClaimed: "<red>Chunk already claimed."
+      claimed: "<red>Chunk already claimed."
 
     missingPermission:
       bankWithdraw: "<red>You don't have bank withdraw permissions in this town."
