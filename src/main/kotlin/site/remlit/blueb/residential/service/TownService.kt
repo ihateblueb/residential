@@ -238,6 +238,12 @@ class TownService {
             if ((town.getMaxChunks() + amount) > Configuration.config.town.claimableChunks.max)
                 throw GracefulCommandException("The total chunk limit for towns is ${Configuration.config.town.claimableChunks.max}.")
 
+            val cost = (Configuration.config.town.claimableChunks.cost * amount)
+            if (town.balance < cost)
+                throw GracefulCommandException("Your town cannot afford this.")
+
+            withdraw(town.uuid, cost, true)
+
             Database.connection.prepareStatement("UPDATE town SET extraChunks = ? WHERE uuid = ?").use { stmt ->
                 stmt.setInt(1, town.extraChunks + amount)
                 stmt.setString(2, town.uuid.toString())

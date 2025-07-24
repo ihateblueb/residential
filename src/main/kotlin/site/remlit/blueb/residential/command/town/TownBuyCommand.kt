@@ -38,6 +38,6 @@ class TownBuyCommand : BaseCommand() {
                 MessageUtil.send(sender, "<dark_green>Successfully bought $amount extra chunks for your town.")
             }
 
-            ConfirmationService.sendConfirmationMessage(sender, confirmation, "<yellow><gold>$amount</gold> extra chunks will cost <gold>${Residential.economy.format(cost.toDouble())}</gold>.")
+            ConfirmationService.sendConfirmationMessage(sender, confirmation, "<yellow><gold>$amount</gold> extra chunks will cost <gold>${Residential.economy.format(cost)}</gold>.")
         }
 }
