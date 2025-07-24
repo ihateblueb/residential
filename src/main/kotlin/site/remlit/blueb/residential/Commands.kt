@@ -22,6 +22,7 @@ class Commands {
             commandManager.registerCommand(InboxCommand())
 
             commandManager.registerCommand(TownBankCommand())
+            commandManager.registerCommand(TownBuyCommand())
             commandManager.registerCommand(TownCommand())
             commandManager.registerCommand(TownRoleCommand())
             commandManager.registerCommand(TownSetCommand())

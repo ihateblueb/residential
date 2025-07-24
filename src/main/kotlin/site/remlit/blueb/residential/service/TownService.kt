@@ -175,14 +175,14 @@ class TownService {
             }
         }
 
-        fun deposit(town: UUID, amount: Double) {
+        fun deposit(town: UUID, amount: Double, quiet: Boolean = false) {
             handleMoneyAdd(town, amount)
-            TownBankDepositEvent(town, amount).callEvent()
+            if (!quiet) TownBankDepositEvent(town, amount).callEvent()
         }
 
-        fun withdraw(town: UUID, amount: Double) {
+        fun withdraw(town: UUID, amount: Double, quiet: Boolean = false) {
             handleMoneyAdd(town, amount * -1)
-            TownBankWithdrawEvent(town, amount).callEvent()
+            if (!quiet) TownBankWithdrawEvent(town, amount).callEvent()
         }
 
         fun setName(town: UUID, name: String) {

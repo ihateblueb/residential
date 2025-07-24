@@ -31,7 +31,7 @@ data class Town(
     val taxFeeMultiplier: Double,
     val taxMaxLate: Int,
 ) {
-    fun getMayor() = TownService.getMayor(uuid)
+    fun getMayor() = TownService.getMayor(uuid) ?: throw Exception("Town mayor cannot be found")
     fun getResidents() = TownService.getResidents(uuid)
     fun getResidentCount() = TownService.getResidentCount(uuid)
     fun getMaxChunks() = Configuration.config.town.claimableChunks.initial

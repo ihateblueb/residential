@@ -18,6 +18,7 @@ import site.remlit.blueb.residential.util.inline.safeCommand
 import site.remlit.blueb.residential.model.GracefulCommandException
 import site.remlit.blueb.residential.service.ChunkService
 import site.remlit.blueb.residential.service.ResidentService
+import site.remlit.blueb.residential.service.TaxService
 import site.remlit.blueb.residential.service.TownService
 import site.remlit.blueb.residential.util.ChunkUtil
 import site.remlit.blueb.residential.util.LocationUtil
@@ -55,6 +56,7 @@ class TownCommand : BaseCommand() {
             MessageUtil.send(player, "Founded ${MessageUtil.formatLocalDateTime(town.foundedAt)}${if (founder != null) " by ${founder.name}" else ""}")
             MessageUtil.send(player, "Mayor: ${mayor?.name} $div Balance: ${Residential.economy.format(town.balance)}")
             MessageUtil.send(player, "Residents: ${town.getResidentCount()} $div Claimed ${allClaimedChunks.size}/${town.getMaxChunks()}")
+            MessageUtil.send(player, "Tax: ${Residential.economy.format(TaxService.town.calculateTax(town.uuid))} $div Resident Tax ${TaxService.town.getBaseTaxForResidents(town.uuid)}")
             MessageUtil.send(player, "Open: ${MessageUtil.formatBoolean(town.open, true)} $div PVP: ${MessageUtil.formatBoolean(town.pvp, true)} $div Mobs: ${MessageUtil.formatBoolean(town.mobs, true)} $div Fire: ${MessageUtil.formatBoolean(town.fire, true)}")
             MessageUtil.send(player, MessageUtil.createLine())
         }

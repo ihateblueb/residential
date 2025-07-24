@@ -24,6 +24,7 @@ class InboxCommand : BaseCommand() {
 
             MessageUtil.send(sender, MessageUtil.createLine("Inbox (${messages.size})"))
             MessageUtil.send(sender, "<red>- <click:run_command:/inbox clear>Clear all messages</click>")
+            // todo: stack and show send date
             for (message in messages) {
                 val number = messages.indexOf(message) + 1
                 MessageUtil.send(sender, "<red><hover:show_text:'<red>Delete message'><click:run_command:/inbox delete ${message.uuid}>✘</click></hover> <gray>${number}. <yellow>${message.sender}: <white>${message.message}")
