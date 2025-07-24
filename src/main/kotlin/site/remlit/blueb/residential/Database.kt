@@ -308,6 +308,13 @@ class Database {
                     stmt.execute("UPDATE database_meta SET version = 15 WHERE id = 'r'")
                     Logger.info("Updated database schema to version 15")
                 }
+
+                if (version <= 15) {
+                    stmt.execute("ALTER TABLE town ADD COLUMN extraChunks int default 0")
+
+                    stmt.execute("UPDATE database_meta SET version = 16 WHERE id = 'r'")
+                    Logger.info("Updated database schema to version 16")
+                }
             }
         }
 

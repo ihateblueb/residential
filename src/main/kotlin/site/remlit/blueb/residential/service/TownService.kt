@@ -224,14 +224,24 @@ class TownService {
             }
         }
 
-        fun announce(uuid: UUID, message: String) {
-            val town = get(uuid)
+        fun announce(town: UUID, message: String) {
+            val town = get(town)!!
 
-            if (town == null)
-                throw GracefulCommandException("Town doesn't exist.")
-
-            for (resident in getResidents(uuid)) {
+            for (resident in getResidents(town.uuid)) {
                 InboxService.send(resident.uuid, town.name, message)
+            }
+        }
+
+        fun buyExtraChunks(town: UUID, amount: Int) {
+            val town = get(town)!!
+
+            if ((town.getMaxChunks() + amount) > Configuration.config.town.claimableChunks.max)
+                throw GracefulCommandException("The total chunk limit for towns is ${Configuration.config.town.claimableChunks.max}.")
+
+            Database.connection.prepareStatement("UPDATE town SET extraChunks = ? WHERE uuid = ?").use { stmt ->
+                stmt.setInt(1, town.extraChunks + amount)
+                stmt.setString(2, town.uuid.toString())
+                stmt.execute()
             }
         }
     }

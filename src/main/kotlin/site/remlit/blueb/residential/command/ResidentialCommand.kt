@@ -46,5 +46,7 @@ class ResidentialCommand : BaseCommand() {
                 throw GracefulCommandException("You must specify a UUID.")
 
             ConfirmationService.cancel(UUID.fromString(uuid))
+
+            MessageUtil.send(sender, "<yellow>Cancelled action.")
         }
 }

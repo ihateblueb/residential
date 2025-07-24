@@ -30,11 +30,13 @@ data class Town(
     val taxDebt: Boolean,
     val taxFeeMultiplier: Double,
     val taxMaxLate: Int,
+
+    val extraChunks: Int,
 ) {
     fun getMayor() = TownService.getMayor(uuid) ?: throw Exception("Town mayor cannot be found")
     fun getResidents() = TownService.getResidents(uuid)
     fun getResidentCount() = TownService.getResidentCount(uuid)
-    fun getMaxChunks() = Configuration.config.town.claimableChunks.initial
+    fun getMaxChunks() = Configuration.config.town.claimableChunks.initial + extraChunks
 
     companion object {
         fun fromRs(rs: ResultSet): Town? {
@@ -62,6 +64,8 @@ data class Town(
                     taxDebt = DatabaseUtil.extractNullable<Boolean>(rs, "taxDebt") ?: Configuration.config.town.tax.resident.debt,
                     taxFeeMultiplier = DatabaseUtil.extractNullable<Double>(rs, "taxFeeMultiplier") ?: Configuration.config.town.tax.resident.feeMultiplier,
                     taxMaxLate = DatabaseUtil.extractNullable<Int>(rs, "taxMaxLate") ?: Configuration.config.town.tax.resident.maxLate,
+
+                    extraChunks = rs.getInt("extraChunks"),
                 )
             }
             return null
@@ -94,6 +98,8 @@ data class Town(
                         taxDebt = DatabaseUtil.extractNullable<Boolean>(rs, "taxDebt") ?: Configuration.config.town.tax.resident.debt,
                         taxFeeMultiplier = DatabaseUtil.extractNullable<Double>(rs, "taxFeeMultiplier") ?: Configuration.config.town.tax.resident.feeMultiplier,
                         taxMaxLate = DatabaseUtil.extractNullable<Int>(rs, "taxMaxLate") ?: Configuration.config.town.tax.resident.maxLate,
+
+                        extraChunks = rs.getInt("extraChunks"),
                     )
                 )
             }

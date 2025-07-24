@@ -9,9 +9,9 @@ import java.util.UUID
 class ConfirmationService {
     companion object {
         // pair: confirmation code and task
-        val pending = mutableListOf<Pair<UUID, Unit>>()
+        val pending = mutableListOf<Pair<UUID, () -> Unit>>()
 
-        fun create(task: Unit): UUID {
+        fun create(task: () -> Unit): UUID {
             val uuid = UUID.randomUUID()
 
             pending.add(Pair(uuid, task))
@@ -34,7 +34,7 @@ class ConfirmationService {
             if (pair == null)
                 throw GracefulCommandException("This confirmation has expired.")
 
-            pair.second
+            pair.second.invoke()
 
             pending.remove(pair)
         }
